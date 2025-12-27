@@ -231,69 +231,6 @@ export default function MaintenanceRequestDetailPage() {
             </div>
 
             <div className="space-y-4">
-               <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="status">Status</Label>
-                    <Select
-                      value={request.status}
-                      onValueChange={(v: MaintenanceRequestStatus) => handleSelectChange('status', v)}
-                    >
-                      <SelectTrigger id="status">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="New">New</SelectItem>
-                        <SelectItem value="In Progress">In Progress</SelectItem>
-                        <SelectItem value="Repaired">Repaired</SelectItem>
-                        <SelectItem value="Scrap">Scrap</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                   <div className="grid gap-2">
-                    <Label htmlFor="priority">Priority</Label>
-                    <Select
-                      value={request.priority}
-                      onValueChange={(v: MaintenanceRequestPriority) => handleSelectChange('priority', v)}
-                    >
-                      <SelectTrigger id="priority">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="High">High</SelectItem>
-                        <SelectItem value="Medium">Medium</SelectItem>
-                        <SelectItem value="Low">Low</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                 <div className="grid gap-2">
-                    <Label htmlFor="request-type">Type</Label>
-                    <Select
-                      value={request.requestType}
-                      onValueChange={(v: MaintenanceRequestType) => handleSelectChange('requestType', v)}
-                    >
-                      <SelectTrigger id="request-type">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Corrective">Corrective</SelectItem>
-                        <SelectItem value="Preventive">Preventive</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid gap-2">
-                      <Label htmlFor="due-date">Due Date</Label>
-                      <Input
-                          id="due-date"
-                          type="date"
-                          value={request.dueDate.split('T')[0]}
-                          onChange={(e) => handleInputChange('dueDate', e.target.value)}
-                      />
-                  </div>
-              </div>
-
               <div className="grid gap-2">
                 <Label htmlFor="team">Assigned Team</Label>
                 <Select
@@ -335,6 +272,50 @@ export default function MaintenanceRequestDetailPage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+               <div className="grid gap-2">
+                  <Label htmlFor="due-date">Due Date</Label>
+                  <Input
+                      id="due-date"
+                      type="date"
+                      value={request.dueDate.split('T')[0]}
+                      onChange={(e) => handleInputChange('dueDate', e.target.value)}
+                  />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="status">Status</Label>
+                    <Select
+                      value={request.status}
+                      onValueChange={(v: MaintenanceRequestStatus) => handleSelectChange('status', v)}
+                    >
+                      <SelectTrigger id="status">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="New">New</SelectItem>
+                        <SelectItem value="In Progress">In Progress</SelectItem>
+                        <SelectItem value="Repaired">Repaired</SelectItem>
+                        <SelectItem value="Scrap">Scrap</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                   <div className="grid gap-2">
+                    <Label htmlFor="priority">Priority</Label>
+                    <Select
+                      value={request.priority}
+                      onValueChange={(v: MaintenanceRequestPriority) => handleSelectChange('priority', v)}
+                    >
+                      <SelectTrigger id="priority">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="High">High</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="Low">Low</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
               </div>
             </div>
           </div>
