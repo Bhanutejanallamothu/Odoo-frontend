@@ -14,14 +14,15 @@ export const users: User[] = [
   { id: 'user-10', name: 'Laura Hill', email: 'laura.hill@example.com', avatarUrl: PlaceHolderImages.find(p => p.id === 'user-10')?.imageUrl!, role: 'technician', teamId: 'team-3' },
   { id: 'user-11', name: 'Tejas Modi', email: 'tejas.modi@example.com', avatarUrl: 'https://images.unsplash.com/photo-1594672830234-ba4cfe1202dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWFuJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzY2Nzg2MzA5fDA&ixlib=rb-4.1.0&q=80&w=1080', role: 'employee' },
   { id: 'user-12', name: 'Bhavani P', email: 'bhavani.p@example.com', avatarUrl: 'https://images.unsplash.com/photo-1557053910-d9eadeed1c58?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2Njc0ODM3OHww&ixlib=rb-4.1.0&q=80&w=1080', role: 'employee' },
-  { id: 'user-13', name: 'Mitesh Adim', email: 'mitesh.adim@example.com', avatarUrl: 'https://images.unsplash.com/photo-1594672830234-ba4cfe1202dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWFuJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzY2Nzg2MzA5fDA&ixlib=rb-4.1.0&q=80&w=1080', role: 'technician', teamId: 'team-1' },
-  { id: 'user-14', name: 'Marc Demo', email: 'marc.demo@example.com', avatarUrl: 'https://images.unsplash.com/photo-1594672830234-ba4cfe1202dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWFuJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzY2Nzg2MzA5fDA&ixlib=rb-4.1.0&q=80&w=1080', role: 'technician', teamId: 'team-3' },
+  { id: 'user-13', name: 'Anas Makari', email: 'anas.makari@example.com', avatarUrl: 'https://images.unsplash.com/photo-1594672830234-ba4cfe1202dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWFuJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzY2Nzg2MzA5fDA&ixlib=rb-4.1.0&q=80&w=1080', role: 'technician', teamId: 'team-1' },
+  { id: 'user-14', name: 'Marc Demo', email: 'marc.demo@example.com', avatarUrl: 'https://images.unsplash.com/photo-1594672830234-ba4cfe1202dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWFuJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzY2Nzg2MzA5fDA&ixlib=rb-4.1.0&q=80&w=1080', role: 'technician', teamId: 'team-2' },
+  { id: 'user-15', name: 'Maggie Davidson', email: 'maggie.davidson@example.com', avatarUrl: 'https://images.unsplash.com/photo-1557053910-d9eadeed1c58?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2Njc0ODM3OHww&ixlib=rb-4.1.0&q=80&w=1080', role: 'technician', teamId: 'team-3' },
 ];
 
 export const teams: Team[] = [
-  { id: 'team-1', name: 'Alpha Mechanics', type: 'Mechanics', memberIds: ['user-1', 'user-3', 'user-7', 'user-13'] },
-  { id: 'team-2', name: 'Bravo Electricians', type: 'Electricians', memberIds: ['user-2', 'user-4', 'user-8'] },
-  { id: 'team-3', name: 'Charlie IT', type: 'IT', memberIds: ['user-5', 'user-10', 'user-14'] },
+  { id: 'team-1', name: 'Internal Maintenance', type: 'Mechanics', memberIds: ['user-13'] },
+  { id: 'team-2', name: 'Metrology', type: 'Electricians', memberIds: ['user-14'] },
+  { id: 'team-3', name: 'Subcontractor', type: 'IT', memberIds: ['user-15'] },
 ];
 
 export const equipment: Equipment[] = [
