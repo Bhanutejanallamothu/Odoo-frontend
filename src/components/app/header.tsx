@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import * as React from 'react';
 import {
   Bell,
   LayoutDashboard,
@@ -20,19 +21,34 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
-import { NavItem } from '@/lib/types';
+import { NavItem, UserRole } from '@/lib/types';
 import ThemeToggle from '@/components/ui/cinematic-theme-switcher';
 
-const navItems: NavItem[] = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/requests', label: 'Requests', icon: ClipboardList },
-  { href: '/equipment', label: 'Equipment', icon: Wrench },
-  { href: '/teams', label: 'Teams', icon: Users },
-  { href: '/calendar', label: 'Calendar', icon: Calendar },
+const allNavItems: NavItem[] = [
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiredRoles: ['admin', 'manager', 'technician'] },
+  { href: '/requests', label: 'Requests', icon: ClipboardList, requiredRoles: ['admin', 'manager', 'technician'] },
+  { href: '/my-requests', label: 'My Requests', icon: ClipboardList, requiredRoles: ['employee'] },
+  { href: '/equipment', label: 'Equipment', icon: Wrench, requiredRoles: ['admin', 'manager', 'technician'] },
+  { href: '/teams', label: 'Teams', icon: Users, requiredRoles: ['admin', 'manager'] },
+  { href: '/calendar', label: 'Calendar', icon: Calendar, requiredRoles: ['admin', 'manager', 'technician'] },
 ];
 
 export default function Header() {
   const pathname = usePathname();
+  const [userRole, setUserRole] = React.useState<UserRole | null>(null);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const role = localStorage.getItem('userRole') as UserRole;
+      setUserRole(role);
+    }
+  }, [pathname]);
+
+  const navItems = React.useMemo(() => {
+    if (!userRole) return [];
+    if (userRole === 'admin') return allNavItems.filter(item => item.requiredRoles.includes('admin') || item.requiredRoles.includes('manager'));
+    return allNavItems.filter(item => item.requiredRoles.includes(userRole));
+  }, [userRole]);
 
   return (
     <header className="fixed top-4 left-1/2 -translate-x-1/2 z-30 flex h-16 items-center gap-4 border border-white/10 bg-white/5 px-4 md:px-6 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 rounded-lg w-[calc(100%-2rem)] max-w-7xl">

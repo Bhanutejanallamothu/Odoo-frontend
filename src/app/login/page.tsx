@@ -35,18 +35,32 @@ export default function LoginForm() {
   ].filter(Boolean); // Filter out any undefined users if a role is not found
 
   const [selectedUser, setSelectedUser] = React.useState<User | undefined>(
-    roleDisplayUsers[1] // Default to technician
+    roleDisplayUsers[0] 
   );
+  
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userId');
+    }
+  }, []);
 
   const handleUserChange = (userId: string) => {
-    setSelectedUser(users.find((u) => u.id === userId));
+    const user = users.find((u) => u.id === userId);
+    setSelectedUser(user);
+    if (typeof window !== 'undefined' && user) {
+        localStorage.setItem('userRole', user.role);
+        localStorage.setItem('userId', user.id);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // In a real app, you'd handle Firebase login here.
-    // For this mock, we'll just redirect to the dashboard.
-    router.push('/dashboard');
+    if (selectedUser?.role === 'employee') {
+      router.push('/my-requests');
+    } else {
+      router.push('/dashboard');
+    }
   };
   
   const getRoleDisplayName = (role: string) => {
@@ -61,7 +75,7 @@ export default function LoginForm() {
 
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center">
-      <Card className="mx-auto w-full max-w-sm">
+      <Card className="mx-auto w-full max-w-sm bg-card/80 backdrop-blur-sm">
         <CardHeader className="text-center">
           <CardTitle className="font-headline text-2xl">Login</CardTitle>
           <CardDescription>

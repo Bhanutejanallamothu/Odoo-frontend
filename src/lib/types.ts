@@ -54,10 +54,12 @@ export type MaintenanceRequest = {
   duration?: number; // hours
   notes?: string;
   teamId: string;
+  requesterId?: string;
 };
 
 export type NavItem = {
   href: string;
   label: string;
   icon: LucideIcon;
+  requiredRoles: UserRole[];
 };
