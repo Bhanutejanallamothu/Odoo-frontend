@@ -64,6 +64,14 @@ export default function MaintenanceRequestDetailPage() {
     }
   }, [id, router, toast]);
 
+  const handleMaintenanceForChange = (value: string) => {
+    if (value === 'work_center') {
+      router.push('/work-centers');
+    } else {
+      setMaintenanceFor(value);
+    }
+  };
+
   const handleInputChange = (
     field: keyof MaintenanceRequest,
     value: string | number
@@ -175,7 +183,7 @@ export default function MaintenanceRequestDetailPage() {
               
               <div className="grid gap-2">
                 <Label htmlFor="maintenance-for">Maintenance For</Label>
-                <Select value={maintenanceFor} onValueChange={setMaintenanceFor}>
+                <Select value={maintenanceFor} onValueChange={handleMaintenanceForChange}>
                   <SelectTrigger id="maintenance-for">
                     <SelectValue placeholder="Select type..." />
                   </SelectTrigger>
