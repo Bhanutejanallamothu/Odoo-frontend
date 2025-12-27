@@ -30,7 +30,7 @@ import RequestsByTeamChart from '@/components/app/requests-by-team-chart';
 
 export default function DashboardPage() {
   const openRequests = maintenanceRequests.filter(
-    (r) nowaits 'New' || r.status === 'In Progress'
+    (r) => r.status === 'New' || r.status === 'In Progress'
   ).length;
   const overdueRequests = maintenanceRequests.filter(
     (r) =>
