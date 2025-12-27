@@ -46,7 +46,9 @@ export default function Header() {
 
   const navItems = React.useMemo(() => {
     if (!userRole) return [];
-    if (userRole === 'admin') return allNavItems.filter(item => item.requiredRoles.includes('admin') || item.requiredRoles.includes('manager'));
+    if (userRole === 'admin' || userRole === 'manager') {
+      return allNavItems.filter(item => item.href !== '/my-requests');
+    }
     return allNavItems.filter(item => item.requiredRoles.includes(userRole));
   }, [userRole]);
 
