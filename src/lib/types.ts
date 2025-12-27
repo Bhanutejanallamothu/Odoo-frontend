@@ -45,8 +45,9 @@ export type TeamType = 'Mechanics' | 'Electricians' | 'IT';
 export type Team = {
   id:string;
   name: string;
-  type: TeamType;
-  memberIds: string[];
+  members: string[];
+  totalMembers: number;
+  company: string;
 };
 
 export type MaintenanceRequestStatus = 'New' | 'In Progress' | 'Repaired' | 'Scrap' | 'Blocked' | 'Ready for next stage';

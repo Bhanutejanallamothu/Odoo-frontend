@@ -10,21 +10,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Team, User } from '@/lib/types';
+import { Team } from '@/lib/types';
 
 type TeamsTableProps = {
   teams: Team[];
-  users: User[];
   onRowClick: (team: Team) => void;
 };
 
-export default function TeamsTable({ teams, users, onRowClick }: TeamsTableProps) {
-  const getTeamMemberNames = (memberIds: string[]) => {
-    return memberIds
-      .map((id) => users.find((u) => u.id === id)?.name)
-      .filter(Boolean)
-      .join(', ');
-  };
+export default function TeamsTable({ teams, onRowClick }: TeamsTableProps) {
 
   return (
     <div className="rounded-md border bg-card/50">
@@ -41,9 +34,9 @@ export default function TeamsTable({ teams, users, onRowClick }: TeamsTableProps
           {teams.map((team) => (
             <TableRow key={team.id} onClick={() => onRowClick(team)} className="cursor-pointer">
               <TableCell className="font-medium">{team.name}</TableCell>
-              <TableCell>{team.memberIds.length}</TableCell>
-              <TableCell>{getTeamMemberNames(team.memberIds)}</TableCell>
-              <TableCell>My Company (San Francisco)</TableCell>
+              <TableCell>{team.totalMembers}</TableCell>
+              <TableCell>{team.members.join(', ')}</TableCell>
+              <TableCell>{team.company}</TableCell>
             </TableRow>
           ))}
         </TableBody>

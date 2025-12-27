@@ -100,26 +100,28 @@ export default function TeamsPage() {
   };
 
   const handleSave = async (
-    formData: Omit<Team, 'id' | 'type' | 'memberIds'> & {
-      members: string[];
-    }
+    formData: Omit<Team, 'id' | 'totalMembers'> & { members: string[] }
   ) => {
-    const memberIds = users
-      .filter((u) =>
-        formData.members
-          .map((s) => s.trim())
-          .filter(Boolean)
-          .includes(u.name)
-      )
-      .map((u) => u.id);
+    
+    if (!formData.name) {
+        toast({
+            variant: 'destructive',
+            title: 'Validation Failed',
+            description: 'Team Name is required.'
+        });
+        return;
+    }
 
-    const isEditing = !!currentTeam;
+    const validMembers = formData.members.map(m => m.trim()).filter(Boolean);
 
     const teamData = {
       name: formData.name,
-      memberIds: memberIds,
-      type: 'Mechanics' // default type
+      members: validMembers,
+      totalMembers: validMembers.length,
+      company: formData.company,
     };
+
+    const isEditing = !!currentTeam;
 
     try {
       if (isEditing) {
@@ -178,7 +180,6 @@ export default function TeamsPage() {
           ) : (
             <TeamsTable
               teams={teams}
-              users={users}
               onRowClick={handleEdit}
             />
           )}
@@ -191,7 +192,6 @@ export default function TeamsPage() {
         onSave={handleSave}
         onDelete={handleDelete}
         team={currentTeam}
-        users={users}
       />
 
       <AlertDialog
