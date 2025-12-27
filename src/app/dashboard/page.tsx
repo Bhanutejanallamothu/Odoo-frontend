@@ -7,7 +7,6 @@ import {
   Construction,
   Wrench,
   Search,
-  ChevronDown,
   PlusCircle,
 } from 'lucide-react';
 import {
@@ -27,28 +26,17 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import {
   maintenanceRequests,
   equipment as allEquipment,
-  teams,
 } from '@/lib/mock-data';
 import RequestsByStatusChart from '@/components/app/requests-by-status-chart';
 import RequestsByTeamChart from '@/components/app/requests-by-team-chart';
-import { MaintenanceRequestStatus } from '@/lib/types';
 import Link from 'next/link';
 
 export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [statusFilters, setStatusFilters] = React.useState<string[]>([]);
   
   const openRequests = maintenanceRequests.filter(
     (r) => r.status === 'New' || r.status === 'In Progress'
@@ -66,19 +54,11 @@ export default function DashboardPage() {
         const equipmentName = allEquipment.find(e => e.id === req.equipmentId)?.name || '';
         return (
           (req.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          equipmentName.toLowerCase().includes(searchTerm.toLowerCase())) &&
-          (statusFilters.length === 0 || statusFilters.includes(req.status))
+          equipmentName.toLowerCase().includes(searchTerm.toLowerCase()))
         )
       })
       .slice(0, 5);
-  }, [searchTerm, statusFilters]);
-
-  const toggleFilter = (filterList: string[], setFilterList: React.Dispatch<React.SetStateAction<string[]>>, value: string) => {
-    const newFilterList = filterList.includes(value)
-      ? filterList.filter((item) => item !== value)
-      : [...filterList, value];
-    setFilterList(newFilterList);
-  };
+  }, [searchTerm]);
 
   const statusColors: { [key: string]: string } = {
     New: 'bg-gray-500',
@@ -87,51 +67,33 @@ export default function DashboardPage() {
     Scrap: 'bg-red-500',
   };
 
-  const allStatuses: MaintenanceRequestStatus[] = ['New', 'In Progress', 'Repaired', 'Scrap'];
-
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
+       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight font-headline">
           Dashboard
         </h1>
-        <div className="flex items-center gap-2">
+      </div>
+
+       <div className="flex justify-between items-center gap-4">
+          <Button asChild>
+            <Link href="/requests">
+              <PlusCircle className="mr-2 h-4 w-4" /> New
+            </Link>
+          </Button>
+        <div className="flex-1 max-w-sm mx-auto">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search requests..."
+                placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 max-w-sm"
+                className="pl-10 w-full"
               />
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="ml-auto">
-                  Status <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {allStatuses.map((status) => (
-                  <DropdownMenuCheckboxItem
-                    key={status}
-                    checked={statusFilters.includes(status)}
-                    onCheckedChange={() => toggleFilter(statusFilters, setStatusFilters, status)}
-                  >
-                    {status}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-             <Button asChild>
-              <Link href="/requests">
-                <PlusCircle className="mr-2 h-4 w-4" /> New Request
-              </Link>
-            </Button>
-          </div>
+        </div>
       </div>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
