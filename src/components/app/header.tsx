@@ -1,7 +1,18 @@
+"use client";
+
 import Link from 'next/link';
-import { Search, Bell } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import {
+  Bell,
+  LayoutDashboard,
+  Wrench,
+  Users,
+  ClipboardList,
+  Calendar,
+  FolderGit2,
+  PanelLeft
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,24 +21,91 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { users } from '@/lib/mock-data';
+import { cn } from '@/lib/utils';
+import { NavItem } from '@/lib/types';
+
+const navItems: NavItem[] = [
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/requests', label: 'Requests', icon: ClipboardList },
+  { href: '/equipment', label: 'Equipment', icon: Wrench },
+  { href: '/teams', label: 'Teams', icon: Users },
+  { href: '/calendar', label: 'Calendar', icon: Calendar },
+];
 
 export default function Header() {
   const currentUser = users.find(u => u.email === 'technician@example.com') || users[0];
+  const pathname = usePathname();
 
   return (
     <header className="flex h-16 items-center gap-4 border-b bg-card px-4 md:px-6 sticky top-0 z-30">
-        <div className="md:hidden">
-            <SidebarTrigger />
-        </div>
-      
-      <div className="w-full flex-1">
-        {/* Can be used for global search in the future */}
+      <div className="flex items-center gap-4">
+        <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
+          <FolderGit2 className="h-6 w-6 text-primary" />
+          <span className="font-headline text-lg">GearGuard</span>
+        </Link>
       </div>
 
-      <div className="flex items-center gap-4">
+      <nav className="hidden md:flex items-center gap-4 ml-6">
+        {navItems.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={cn(
+              "text-sm font-medium transition-colors hover:text-primary",
+              pathname.startsWith(item.href) ? "text-primary" : "text-muted-foreground"
+            )}
+          >
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+
+      <div className="flex-1" />
+
+      <div className="flex items-center gap-2">
+         <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="shrink-0 md:hidden"
+              >
+                <PanelLeft className="h-5 w-5" />
+                <span className="sr-only">Toggle navigation menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left">
+              <nav className="grid gap-6 text-lg font-medium">
+                <Link
+                  href="#"
+                  className="flex items-center gap-2 text-lg font-semibold"
+                >
+                  <FolderGit2 className="h-6 w-6" />
+                  <span className="sr-only">GearGuard</span>
+                </Link>
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "hover:text-foreground",
+                       pathname.startsWith(item.href) ? "text-foreground" : "text-muted-foreground"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+            </SheetContent>
+          </Sheet>
+
         <Button variant="ghost" size="icon" className="rounded-full">
             <Bell className="h-5 w-5" />
             <span className="sr-only">Toggle notifications</span>
