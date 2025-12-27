@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import * as React from 'react';
 import {
-  Bell,
   LayoutDashboard,
   Wrench,
   Users,
@@ -24,7 +23,6 @@ import {
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { NavItem, UserRole } from '@/lib/types';
-import ThemeToggle from '@/components/ui/cinematic-theme-switcher';
 
 const allNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiredRoles: ['admin', 'manager', 'technician'] },
@@ -120,11 +118,6 @@ export default function Header() {
             </SheetContent>
           </Sheet>
 
-        <ThemeToggle />
-        <Button variant="ghost" size="icon" className="rounded-full">
-            <Bell className="h-5 w-5" />
-            <span className="sr-only">Toggle notifications</span>
-        </Button>
         <Button asChild variant="outline" size="sm">
             <Link href="/login">
                 <LogOut className="mr-2 h-4 w-4" />
