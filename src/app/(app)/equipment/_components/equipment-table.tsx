@@ -164,17 +164,15 @@ export default function EquipmentTable({
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                       <Link href={`/requests?equipmentId=${item.id}`} passHref>
-                        <Button variant="outline" size="sm" asChild>
-                           <a>
+                       <Button asChild variant="outline" size="sm">
+                          <Link href={`/requests?equipmentId=${item.id}`}>
                             <Wrench className="mr-2 h-4 w-4" />
                             Maintenance
                             {getOpenRequestCount(item.id) > 0 && (
                                 <Badge variant="destructive" className="ml-2">{getOpenRequestCount(item.id)}</Badge>
                             )}
-                           </a>
+                           </Link>
                         </Button>
-                       </Link>
                        <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
