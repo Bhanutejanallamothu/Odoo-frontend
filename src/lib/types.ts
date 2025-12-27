@@ -26,6 +26,7 @@ export type Equipment = {
   isScrapped: boolean;
   status: EquipmentStatus;
   category: string;
+  health: number; // Percentage from 0 to 100
 };
 
 export type TeamType = 'Mechanics' | 'Electricians' | 'IT';

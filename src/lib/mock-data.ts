@@ -21,12 +21,12 @@ export const teams: Team[] = [
 ];
 
 export const equipment: Equipment[] = [
-  { id: 'equip-1', name: 'CNC Machine X-5', serialNumber: 'SN-X5-001', department: 'Manufacturing', maintenanceTeamId: 'team-1', location: 'Floor 1, Bay A', purchaseDate: '2022-01-15', warrantyExpiry: '2025-01-15', isScrapped: false, status: 'Operational', category: 'Machinery' },
-  { id: 'equip-2', name: 'Packaging Robot Arm', serialNumber: 'SN-RA-002', department: 'Logistics', maintenanceTeamId: 'team-2', location: 'Warehouse 3', purchaseDate: '2021-06-20', warrantyExpiry: '2024-06-20', isScrapped: false, status: 'Under Maintenance', category: 'Robotics' },
-  { id: 'equip-3', name: 'Conveyor Belt System', serialNumber: 'SN-CB-003', department: 'Manufacturing', maintenanceTeamId: 'team-1', location: 'Floor 1, Assembly Line', purchaseDate: '2020-11-01', warrantyExpiry: '2023-11-01', isScrapped: false, status: 'Operational', category: 'Machinery' },
-  { id: 'equip-4', name: 'Main Server Rack', serialNumber: 'SN-SR-004', department: 'IT', maintenanceTeamId: 'team-3', location: 'Data Center', purchaseDate: '2023-03-10', warrantyExpiry: '2026-03-10', isScrapped: false, status: 'Operational', category: 'IT Hardware' },
-  { id: 'equip-5', name: 'Forklift F-150', serialNumber: 'SN-FL-005', department: 'Logistics', maintenanceTeamId: 'team-1', location: 'Warehouse 1', purchaseDate: '2019-08-05', warrantyExpiry: '2022-08-05', isScrapped: true, status: 'Scrapped', category: 'Vehicle' },
-  { id: 'equip-6', name: 'HVAC Unit 2', serialNumber: 'SN-HVAC-006', department: 'Facilities', maintenanceTeamId: 'team-2', location: 'Rooftop', purchaseDate: '2022-09-01', warrantyExpiry: '2027-09-01', isScrapped: false, status: 'Operational', category: 'Facilities' },
+  { id: 'equip-1', name: 'CNC Machine X-5', serialNumber: 'SN-X5-001', department: 'Manufacturing', maintenanceTeamId: 'team-1', location: 'Floor 1, Bay A', purchaseDate: '2022-01-15', warrantyExpiry: '2025-01-15', isScrapped: false, status: 'Operational', category: 'Machinery', health: 25 },
+  { id: 'equip-2', name: 'Packaging Robot Arm', serialNumber: 'SN-RA-002', department: 'Logistics', maintenanceTeamId: 'team-2', location: 'Warehouse 3', purchaseDate: '2021-06-20', warrantyExpiry: '2024-06-20', isScrapped: false, status: 'Under Maintenance', category: 'Robotics', health: 45 },
+  { id: 'equip-3', name: 'Conveyor Belt System', serialNumber: 'SN-CB-003', department: 'Manufacturing', maintenanceTeamId: 'team-1', location: 'Floor 1, Assembly Line', purchaseDate: '2020-11-01', warrantyExpiry: '2023-11-01', isScrapped: false, status: 'Operational', category: 'Machinery', health: 92 },
+  { id: 'equip-4', name: 'Main Server Rack', serialNumber: 'SN-SR-004', department: 'IT', maintenanceTeamId: 'team-3', location: 'Data Center', purchaseDate: '2023-03-10', warrantyExpiry: '2026-03-10', isScrapped: false, status: 'Operational', category: 'IT Hardware', health: 98 },
+  { id: 'equip-5', name: 'Forklift F-150', serialNumber: 'SN-FL-005', department: 'Logistics', maintenanceTeamId: 'team-1', location: 'Warehouse 1', purchaseDate: '2019-08-05', warrantyExpiry: '2022-08-05', isScrapped: true, status: 'Scrapped', category: 'Vehicle', health: 0 },
+  { id: 'equip-6', name: 'HVAC Unit 2', serialNumber: 'SN-HVAC-006', department: 'Facilities', maintenanceTeamId: 'team-2', location: 'Rooftop', purchaseDate: '2022-09-01', warrantyExpiry: '2027-09-01', isScrapped: false, status: 'Operational', category: 'Facilities', health: 15 },
 ];
 
 export const maintenanceRequests: MaintenanceRequest[] = [

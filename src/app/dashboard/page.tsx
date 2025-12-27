@@ -32,6 +32,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   maintenanceRequests,
   equipment as allEquipment,
+  users,
 } from '@/lib/mock-data';
 import RequestsByStatusChart from '@/components/app/requests-by-status-chart';
 import RequestsByTeamChart from '@/components/app/requests-by-team-chart';
@@ -42,12 +43,17 @@ export default function DashboardPage() {
   
   const openRequests = maintenanceRequests.filter(
     (r) => r.status === 'New' || r.status === 'In Progress'
-  ).length;
-  const overdueRequests = maintenanceRequests.filter(
-    (r) =>
-      (r.status === 'New' || r.status === 'In Progress') &&
-      new Date(r.dueDate) < new Date()
-  ).length;
+  );
+  const overdueRequests = openRequests.filter(
+    (r) => new Date(r.dueDate) < new Date()
+  );
+
+  const criticalEquipmentCount = allEquipment.filter(e => e.health < 30 && e.status !== 'Scrapped').length;
+  
+  const technicians = users.filter(u => u.role === 'technician');
+  const assignedTechnicians = new Set(openRequests.map(r => r.assignedTechnicianId));
+  const technicianLoad = technicians.length > 0 ? Math.round((assignedTechnicians.size / technicians.length) * 100) : 0;
+
 
   const filteredRecentRequests = React.useMemo(() => {
     return [...maintenanceRequests]
@@ -105,7 +111,7 @@ export default function DashboardPage() {
             <ServerCrash className="h-4 w-4 text-red-700" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-700">5 Units</div>
+            <div className="text-2xl font-bold text-red-700">{criticalEquipmentCount} Units</div>
             <p className="text-xs text-red-700/80">
               (Health &lt; 30%)
             </p>
@@ -119,7 +125,7 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-blue-700" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-700">85% Utilized</div>
+            <div className="text-2xl font-bold text-blue-700">{technicianLoad}% Utilized</div>
             <p className="text-xs text-blue-700/80">
               Assign Carefully
             </p>
@@ -131,9 +137,9 @@ export default function DashboardPage() {
             <Construction className="h-4 w-4 text-green-700" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-700">12 Pending</div>
+            <div className="text-2xl font-bold text-green-700">{openRequests.length} Pending</div>
             <p className="text-xs text-green-700/80">
-              3 Overdue
+              {overdueRequests.length} Overdue
             </p>
           </CardContent>
         </Card>
