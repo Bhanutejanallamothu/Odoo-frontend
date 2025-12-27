@@ -59,7 +59,7 @@ export default function Header() {
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <Link href="/login">
+            <Link href="/">
               <DropdownMenuItem>Log out</DropdownMenuItem>
             </Link>
           </DropdownMenuContent>
