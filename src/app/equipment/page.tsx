@@ -6,10 +6,9 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import EquipmentTable from './_components/equipment-table';
-import { equipment, teams } from '@/lib/mock-data';
+import { equipment, teams, users } from '@/lib/mock-data';
 
 export default function EquipmentPage() {
-  const departments = [...new Set(equipment.map((e) => e.department))];
   
   return (
     <div className="flex flex-col gap-8">
@@ -26,8 +25,7 @@ export default function EquipmentPage() {
         <CardContent>
           <EquipmentTable
             equipment={equipment}
-            teams={teams}
-            departments={departments}
+            users={users}
           />
         </CardContent>
       </Card>

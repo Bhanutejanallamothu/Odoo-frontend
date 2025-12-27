@@ -20,6 +20,7 @@ export type Equipment = {
   department: string;
   assignedEmployeeId?: string;
   maintenanceTeamId: string;
+  assignedTechnicianId?: string;
   purchaseDate: string; // ISO 8601
   warrantyExpiry: string; // ISO 8601
   location: string;

@@ -1,14 +1,12 @@
 "use client";
 
 import * as React from 'react';
-import Link from 'next/link';
 import {
-  ChevronDown,
-  Filter,
-  PlusCircle,
-  Wrench,
   Search,
-  MoreHorizontal
+  PlusCircle,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import {
   Table,
@@ -20,7 +18,6 @@ import {
 } from '@/components/ui/table';
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
@@ -29,124 +26,63 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Equipment, Team } from '@/lib/types';
-import { maintenanceRequests } from '@/lib/mock-data';
+import { Equipment, User } from '@/lib/types';
 
 type EquipmentTableProps = {
   equipment: Equipment[];
-  teams: Team[];
-  departments: string[];
+  users: User[];
 };
 
 export default function EquipmentTable({
   equipment: allEquipment,
-  teams,
-  departments,
+  users,
 }: EquipmentTableProps) {
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [departmentFilters, setDepartmentFilters] = React.useState<string[]>([]);
-  const [teamFilters, setTeamFilters] = React.useState<string[]>([]);
 
-  const getTeamName = (teamId: string) => {
-    return teams.find((t) => t.id === teamId)?.name || 'N/A';
+  const getEmployeeName = (employeeId?: string) => {
+    if (!employeeId) return 'N/A';
+    return users.find((u) => u.id === employeeId)?.name || 'N/A';
   };
   
-  const getOpenRequestCount = (equipmentId: string) => {
-    return maintenanceRequests.filter(req => req.equipmentId === equipmentId && (req.status === 'New' || req.status === 'In Progress')).length;
-  };
+  const getTechnicianName = (technicianId?: string) => {
+      if (!technicianId) return 'N/A';
+      return users.find(u => u.id === technicianId)?.name || 'N/A'
+  }
 
   const filteredEquipment = React.useMemo(() => {
-    return allEquipment
-      .filter((item) =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.location.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      .filter(
-        (item) =>
-          departmentFilters.length === 0 ||
-          departmentFilters.includes(item.department)
-      )
-      .filter(
-        (item) =>
-          teamFilters.length === 0 || teamFilters.includes(item.maintenanceTeamId)
-      );
-  }, [allEquipment, searchTerm, departmentFilters, teamFilters]);
+    return allEquipment.filter((item) =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.serialNumber.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [allEquipment, searchTerm]);
   
-  const toggleFilter = (filterList: string[], setFilterList: React.Dispatch<React.SetStateAction<string[]>>, value: string) => {
-    const newFilterList = filterList.includes(value)
-      ? filterList.filter((item) => item !== value)
-      : [...filterList, value];
-    setFilterList(newFilterList);
-  };
-
-  const statusVariant: { [key in Equipment['status']]: "default" | "secondary" | "destructive" } = {
-    'Operational': 'default',
-    'Under Maintenance': 'secondary',
-    'Scrapped': 'destructive'
-  };
-
   return (
     <div className="w-full">
       <div className="flex items-center justify-between py-4">
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search equipment..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 max-w-sm"
-            />
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                <Filter className="mr-2 h-4 w-4" />
-                Filter <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Filter by Department</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {departments.map((dept) => (
-                <DropdownMenuCheckboxItem
-                  key={dept}
-                  checked={departmentFilters.includes(dept)}
-                  onCheckedChange={() => toggleFilter(departmentFilters, setDepartmentFilters, dept)}
-                >
-                  {dept}
-                </DropdownMenuCheckboxItem>
-              ))}
-              <DropdownMenuLabel>Filter by Team</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {teams.map((team) => (
-                <DropdownMenuCheckboxItem
-                  key={team.id}
-                  checked={teamFilters.includes(team.id)}
-                  onCheckedChange={() => toggleFilter(teamFilters, setTeamFilters, team.id)}
-                >
-                  {team.name}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
         <Button>
-          <PlusCircle className="mr-2 h-4 w-4" /> Add Equipment
+          <PlusCircle className="mr-2 h-4 w-4" /> New Equipment
         </Button>
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 w-full"
+          />
+        </div>
       </div>
       <div className="rounded-md border bg-card/50">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Equipment Name</TableHead>
-              <TableHead>Serial Number</TableHead>
+              <TableHead>Employee</TableHead>
               <TableHead>Department</TableHead>
-              <TableHead>Assigned Team</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>Serial Number</TableHead>
+              <TableHead>Technician</TableHead>
+              <TableHead>Equipment Category</TableHead>
+              <TableHead>Company</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -155,24 +91,14 @@ export default function EquipmentTable({
               filteredEquipment.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell className="font-medium">{item.name}</TableCell>
-                  <TableCell className="font-code">{item.serialNumber}</TableCell>
+                  <TableCell>{getEmployeeName(item.assignedEmployeeId)}</TableCell>
                   <TableCell>{item.department}</TableCell>
-                  <TableCell>{getTeamName(item.maintenanceTeamId)}</TableCell>
-                  <TableCell>{item.location}</TableCell>
-                  <TableCell>
-                    <Badge variant={statusVariant[item.status]}>{item.status}</Badge>
-                  </TableCell>
+                  <TableCell className="font-code">{item.serialNumber}</TableCell>
+                  <TableCell>{getTechnicianName(item.assignedTechnicianId)}</TableCell>
+                  <TableCell>{item.category}</TableCell>
+                  <TableCell>My Company (San Francisco)</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                       <Button asChild variant="outline" size="sm">
-                          <Link href={`/requests?equipmentId=${item.id}`}>
-                            <Wrench className="mr-2 h-4 w-4" />
-                            Maintenance
-                            {getOpenRequestCount(item.id) > 0 && (
-                                <Badge variant="destructive" className="ml-2">{getOpenRequestCount(item.id)}</Badge>
-                            )}
-                           </Link>
-                        </Button>
                        <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -183,8 +109,10 @@ export default function EquipmentTable({
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem>View Details</DropdownMenuItem>
+                            <DropdownMenuItem><Pencil className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive">
+                               <Trash2 className="mr-2 h-4 w-4" /> Delete
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
@@ -193,7 +121,7 @@ export default function EquipmentTable({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
+                <TableCell colSpan={8} className="h-24 text-center">
                   No results found.
                 </TableCell>
               </TableRow>
