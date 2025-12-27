@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -46,7 +47,10 @@ export default function Header() {
 
   const navItems = React.useMemo(() => {
     if (!userRole) return [];
-    if (userRole === 'admin' || userRole === 'manager') {
+    if (userRole === 'admin') {
+       return allNavItems.filter(item => item.href !== '/my-requests');
+    }
+    if (userRole === 'manager') {
       return allNavItems.filter(item => item.href !== '/my-requests');
     }
     return allNavItems.filter(item => item.requiredRoles.includes(userRole));
