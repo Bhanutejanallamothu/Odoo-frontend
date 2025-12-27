@@ -4,7 +4,6 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
 import Header from "@/components/app/header";
-import { ThemeProvider } from "@/components/theme-provider";
 import LiquidEther from "@/components/ui/LiquidEther";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -28,12 +27,6 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Code+Pro&display=swap" rel="stylesheet" />
       </head>
       <body className={cn('font-body antialiased bg-background', inter.variable)}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
            <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: -1 }}>
             <LiquidEther
                 colors={[ '#5227FF', '#FF9FFC', '#B19EEF' ]}
@@ -58,7 +51,6 @@ export default function RootLayout({
             <main className="p-4 sm:p-6 lg:p-8 flex-1 pt-24">{children}</main>
           </div>
           <Toaster />
-        </ThemeProvider>
       </body>
     </html>
   );

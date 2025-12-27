@@ -22,12 +22,11 @@ import {
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { NavItem, UserRole } from '@/lib/types';
-import ThemeToggle from '@/components/ui/cinematic-theme-switcher';
 import { Bell } from 'lucide-react';
 
 const allNavItems: NavItem[] = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiredRoles: ['admin', 'manager', 'technician'] },
-    { href: '/requests', label: 'Requests', icon: Wrench, requiredRoles: ['admin', 'manager', 'technician'] },
+    { href: '/my-requests', label: 'My Requests', icon: Wrench, requiredRoles: ['employee'] },
     { href: '/equipment', label: 'Equipment', icon: Wrench, requiredRoles: ['admin', 'manager', 'technician'] },
     { href: '/calendar', label: 'Calendar', icon: Calendar, requiredRoles: ['admin', 'manager', 'technician'] },
     { href: '/reporting', label: 'Reporting', icon: LineChart, requiredRoles: ['admin', 'manager'] },
@@ -47,6 +46,8 @@ export default function Header() {
 
   const navItems = React.useMemo(() => {
     if (!userRole) return [];
+    if (userRole === 'admin') return allNavItems;
+    if (userRole === 'manager') return allNavItems.filter(item => item.requiredRoles.includes('manager') || item.requiredRoles.includes('admin'));
     return allNavItems.filter(item => item.requiredRoles.includes(userRole));
   }, [userRole]);
 
@@ -113,11 +114,6 @@ export default function Header() {
             </SheetContent>
           </Sheet>
         
-        <ThemeToggle />
-        <Button variant="ghost" size="icon" className="rounded-full">
-            <Bell className="h-5 w-5" />
-            <span className="sr-only">Toggle notifications</span>
-        </Button>
         <Button asChild variant="outline" size="sm">
             <Link href="/login">
                 <LogOut className="mr-2 h-4 w-4" />
