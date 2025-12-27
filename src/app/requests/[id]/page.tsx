@@ -73,7 +73,8 @@ export default function MaintenanceRequestDetailPage() {
     value: any
   ) => {
     if (request) {
-      setRequest({ ...request, [field]: value });
+      const updatedValue = value === 'unassigned' ? '' : value;
+      setRequest({ ...request, [field]: updatedValue });
     }
   };
   
@@ -270,7 +271,7 @@ export default function MaintenanceRequestDetailPage() {
             <div className="grid gap-2">
               <Label htmlFor="technician">Assigned Technician</Label>
               <Select
-                value={request.assignedTechnicianId}
+                value={request.assignedTechnicianId || 'unassigned'}
                 onValueChange={(v) => handleSelectChange('assignedTechnicianId', v)}
                 disabled={!request.teamId}
               >
@@ -278,7 +279,7 @@ export default function MaintenanceRequestDetailPage() {
                   <SelectValue placeholder="Assign a technician..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Unassigned</SelectItem>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
                   {techniciansForTeam.map((u) => (
                     <SelectItem key={u.id} value={u.id}>
                       {u.name}
