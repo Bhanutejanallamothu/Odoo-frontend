@@ -115,7 +115,7 @@ export default function DashboardPage() {
 
       <div className="flex justify-between items-center gap-4">
         <Button asChild>
-          <Link href="/requests/new">
+          <Link href="/requests?create=true">
             <PlusCircle className="mr-2 h-4 w-4" /> New
           </Link>
         </Button>

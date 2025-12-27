@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -22,129 +22,109 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Equipment, User, Team, WorkCenter } from '@/lib/types';
-import { ArrowLeft, Save, Wrench, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
-import { Skeleton } from '@/components/ui/skeleton';
-import { getEquipmentById, updateEquipment, deleteEquipment } from '@/lib/api/equipment';
+import { createEquipment } from '@/lib/api/equipment';
 import { getUsers } from '@/lib/api/users';
 import { getTeams } from '@/lib/api/teams';
 import { getWorkCenters } from '@/lib/api/work-centers';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default function EquipmentDetailPage() {
+type NewEquipment = Omit<Equipment, 'id' | 'health' | 'status' | 'isScrapped'>;
+
+export default function NewEquipmentPage() {
   const router = useRouter();
-  const params = useParams();
   const { toast } = useToast();
-  const { id } = params;
 
-  const [equipment, setEquipment] = React.useState<Equipment | null>(null);
+  const [equipment, setEquipment] = React.useState<Partial<NewEquipment>>({
+      name: '',
+      serialNumber: '',
+      department: 'R&D',
+      location: 'Main Building'
+  });
   const [users, setUsers] = React.useState<User[]>([]);
   const [teams, setTeams] = React.useState<Team[]>([]);
   const [workCenters, setWorkCenters] = React.useState<WorkCenter[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
 
   const [usedBy, setUsedBy] = React.useState('employee');
 
   React.useEffect(() => {
-    if (!id || typeof id !== 'string') return;
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [equipData, usersData, teamsData, wcData] = await Promise.all([
-          getEquipmentById(id as string),
+        const [usersData, teamsData, wcData] = await Promise.all([
           getUsers(),
           getTeams(),
           getWorkCenters(),
         ]);
-
-        setEquipment(equipData);
         setUsers(usersData);
         setTeams(teamsData);
         setWorkCenters(wcData);
-
-        if (equipData.assignedEmployeeId) {
-          setUsedBy('employee');
-        } else {
-          setUsedBy('department');
-        }
       } catch (error) {
-        console.error('Failed to fetch equipment details', error);
+        console.error('Failed to fetch data for new equipment form', error);
         toast({
           variant: 'destructive',
-          title: 'Not Found',
-          description: 'Equipment not found or failed to load data.',
+          title: 'Error',
+          description: 'Failed to load necessary data.',
         });
-        router.push('/equipment');
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-  }, [id, router, toast]);
+  }, [toast]);
 
   const handleInputChange = (
-    field: keyof Equipment,
+    field: keyof NewEquipment,
     value: string | number
   ) => {
-    if (equipment) {
       setEquipment({ ...equipment, [field]: value });
-    }
   };
 
   const handleSave = async () => {
-    if (!equipment) return;
+    if (!equipment.name || !equipment.category || !equipment.maintenanceTeamId) {
+        toast({
+            variant: 'destructive',
+            title: 'Missing Fields',
+            description: 'Please fill out Name, Category, and Maintenance Team.'
+        })
+        return;
+    }
+
+    const equipmentToSave: Omit<Equipment, 'id'> = {
+        ...equipment,
+        name: equipment.name,
+        serialNumber: equipment.serialNumber || `SN-${Date.now()}`,
+        department: equipment.department || 'General',
+        maintenanceTeamId: equipment.maintenanceTeamId,
+        purchaseDate: equipment.purchaseDate || new Date().toISOString(),
+        warrantyExpiry: equipment.warrantyExpiry || new Date().toISOString(),
+        location: equipment.location || 'Unassigned',
+        isScrapped: false,
+        status: 'Operational',
+        category: equipment.category,
+        health: 100,
+    }
     
     try {
-        await updateEquipment(equipment.id, equipment);
-        
+        await createEquipment(equipmentToSave);
         toast({
-          title: 'Equipment Saved',
-          description: `Changes to "${equipment.name}" have been saved.`,
+          title: 'Equipment Created',
+          description: `"${equipment.name}" has been successfully created.`,
         });
         router.push('/equipment');
-
     } catch (error) {
         console.error(error);
         toast({
             variant: 'destructive',
             title: 'Save Failed',
-            description: 'Could not save equipment changes.'
+            description: 'Could not create the new equipment.'
         })
     }
   };
 
-  const handleDelete = async () => {
-    if (!equipment) return;
-    try {
-      await deleteEquipment(equipment.id);
-      toast({
-        title: 'Equipment Deleted',
-        description: `"${equipment.name}" has been deleted.`,
-      });
-      router.push('/equipment');
-    } catch (error) {
-      console.error(error);
-      toast({
-        variant: 'destructive',
-        title: 'Delete Failed',
-        description: 'Could not delete the equipment.',
-      });
-    } finally {
-      setIsDeleteDialogOpen(false);
-    }
-  };
-
-  if (loading || !equipment) {
+  if (loading) {
     return (
         <div className="flex flex-col gap-8">
             <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -153,8 +133,7 @@ export default function EquipmentDetailPage() {
                     <Skeleton className="h-7 w-64" />
                 </div>
                 <div className="flex items-center gap-2 ml-auto">
-                    <Skeleton className="h-10 w-32" />
-                    <Skeleton className="h-10 w-32" />
+                    <Skeleton className="h-10 w-24" />
                 </div>
             </div>
             <Skeleton className="h-96 w-full" />
@@ -174,27 +153,22 @@ export default function EquipmentDetailPage() {
               Equipment
             </Link>
             <span className="text-primary mx-2">&gt;</span>
-            <span className="text-primary">{equipment.name}</span>
+            <span className="text-primary">New Equipment</span>
           </h1>
         </div>
         <div className="flex items-center gap-2 ml-auto">
-          <Button variant="outline" asChild>
-            <Link href={`/requests?equipmentId=${equipment.id}`}>
-              <Wrench className="mr-2 h-4 w-4" /> Maintenance
-            </Link>
-          </Button>
           <Button onClick={handleSave}>
             <Save className="mr-2 h-4 w-4" />
-            Save Changes
+            Create Equipment
           </Button>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Edit Equipment</CardTitle>
+          <CardTitle>Create New Equipment</CardTitle>
           <CardDescription>
-            Update the details for this piece of equipment.
+            Fill in the details for the new piece of equipment.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -202,16 +176,17 @@ export default function EquipmentDetailPage() {
             {/* Left Section */}
             <div className="space-y-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">Name *</Label>
                 <Input
                   id="name"
                   value={equipment.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
+                  placeholder="e.g. Dell XPS 15"
                 />
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="category">Equipment Category</Label>
+                <Label htmlFor="category">Equipment Category *</Label>
                 <Select
                   value={equipment.category}
                   onValueChange={(v) => handleInputChange('category', v)}
@@ -257,7 +232,7 @@ export default function EquipmentDetailPage() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="maintenance-team">Maintenance Team</Label>
+                <Label htmlFor="maintenance-team">Maintenance Team *</Label>
                 <Select
                   value={equipment.maintenanceTeamId}
                   onValueChange={(v) =>
@@ -310,6 +285,7 @@ export default function EquipmentDetailPage() {
                   onValueChange={(v) =>
                     handleInputChange('assignedTechnicianId', v)
                   }
+                   disabled={!equipment.maintenanceTeamId}
                 >
                   <SelectTrigger id="technician">
                     <SelectValue placeholder="Select a technician" />
@@ -354,11 +330,16 @@ export default function EquipmentDetailPage() {
                   </Select>
                 </div>
               )}
-
-              <div className="grid gap-2">
-                <Label htmlFor="scrap-date">Scrap Date</Label>
-                <Input id="scrap-date" type="date" />
+              
+               <div className="grid gap-2">
+                <Label htmlFor="serial-number">Serial Number</Label>
+                <Input
+                  id="serial-number"
+                  value={equipment.serialNumber}
+                  onChange={(e) => handleInputChange('serialNumber', e.target.value)}
+                />
               </div>
+
 
               <div className="grid gap-2">
                 <Label htmlFor="used-in-location">Used in Location</Label>
@@ -390,31 +371,6 @@ export default function EquipmentDetailPage() {
           </div>
         </CardContent>
       </Card>
-        <div className="mt-4">
-            <Button variant="destructive" onClick={() => setIsDeleteDialogOpen(true)}>
-                <Trash2 className="mr-2 h-4 w-4" /> Delete Equipment
-            </Button>
-        </div>
-        <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              equipment "{equipment?.name}".
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>
-              Continue
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

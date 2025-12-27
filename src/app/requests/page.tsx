@@ -1,6 +1,6 @@
 'use client';
 import * as React from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import {
   DndContext,
   closestCenter,
@@ -94,6 +94,7 @@ function ClientOnlyDndContext({
 
 export default function RequestsPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { toast } = useToast();
 
   const [requests, setRequests] = React.useState<MaintenanceRequest[]>([]);
@@ -112,6 +113,16 @@ export default function RequestsPage() {
   });
 
   const equipmentIdParam = searchParams.get('equipmentId');
+  const createParam = searchParams.get('create');
+
+  React.useEffect(() => {
+    if(createParam) {
+      setIsModalOpen(true);
+      // Remove the query param from the URL
+      router.replace('/requests');
+    }
+  }, [createParam, router]);
+
 
   const [teamFilter, setTeamFilter] = React.useState<string[]>([]);
   const [technicianFilter, setTechnicianFilter] = React.useState<string[]>([]);
@@ -251,6 +262,7 @@ export default function RequestsPage() {
     try {
       const requestToCreate = {
         ...newRequest,
+        requesterId: 'user-1', // Mock user until auth is complete
         ...(newRequest.requestType === 'Preventive' && {
           scheduledDate: newRequest.dueDate,
         }),

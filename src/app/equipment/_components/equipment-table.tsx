@@ -49,15 +49,17 @@ export default function EquipmentTable({
   const filteredEquipment = React.useMemo(() => {
     return allEquipment.filter((item) =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.serialNumber.toLowerCase().includes(searchTerm.toLowerCase())
+      (item.serialNumber && item.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [allEquipment, searchTerm]);
   
   return (
     <div className="w-full">
       <div className="flex items-center justify-between py-4">
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" /> New Equipment
+        <Button asChild>
+          <Link href="/equipment/new">
+            <PlusCircle className="mr-2 h-4 w-4" /> New Equipment
+          </Link>
         </Button>
         <div className="relative w-full max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
