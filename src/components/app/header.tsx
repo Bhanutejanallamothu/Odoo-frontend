@@ -10,24 +10,15 @@ import {
   ClipboardList,
   Calendar,
   FolderGit2,
-  PanelLeft
+  PanelLeft,
+  LogOut,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { users } from '@/lib/mock-data';
 import { cn } from '@/lib/utils';
 import { NavItem } from '@/lib/types';
 import ThemeToggle from '@/components/ui/cinematic-theme-switcher';
@@ -41,13 +32,7 @@ const navItems: NavItem[] = [
 ];
 
 export default function Header() {
-  const currentUser = users.find(u => u.email === 'technician@example.com') || users[0];
   const pathname = usePathname();
-
-  // Hide header on login and register pages
-  if (pathname === '/login' || pathname === '/register') {
-    return null;
-  }
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-white/10 bg-white/5 px-4 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 md:px-6">
@@ -117,38 +102,12 @@ export default function Header() {
             <Bell className="h-5 w-5" />
             <span className="sr-only">Toggle notifications</span>
         </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-              <Avatar className="h-9 w-9">
-                <AvatarImage
-                  src={currentUser.avatarUrl}
-                  alt={currentUser.name}
-                />
-                <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end" forceMount>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">
-                  {currentUser.name}
-                </p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  {currentUser.email}
-                </p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuSeparator />
+        <Button asChild variant="outline" size="sm">
             <Link href="/login">
-              <DropdownMenuItem>Log out</DropdownMenuItem>
+                <LogOut className="mr-2 h-4 w-4" />
+                Log Out
             </Link>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        </Button>
       </div>
     </header>
   );
