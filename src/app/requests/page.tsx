@@ -107,28 +107,33 @@ export default function RequestsPage() {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (active.id !== over?.id) {
-      const oldIndex = requests.findIndex((r) => r.id === active.id);
-      const newIndex = requests.findIndex((r) => r.id === over?.id);
-      
-      const overContainer = over?.data.current?.sortable?.containerId;
-      const newStatus = statusColumns.find(s => s === overContainer) as MaintenanceRequestStatus;
-      
-      if(newStatus) {
-        setRequests((requests) => {
-          let newRequests = [...requests];
-          const activeIndex = newRequests.findIndex(r => r.id === active.id);
-          
-          if(activeIndex !== -1) {
-            newRequests[activeIndex] = { ...newRequests[activeIndex], status: newStatus };
-          }
-          
-          // Re-sort or move if needed
-          newRequests = arrayMove(newRequests, oldIndex, newIndex);
+    if (!over) return;
 
-          return newRequests;
-        });
-      }
+    const activeId = active.id;
+    const overId = over.id;
+
+    const overContainer = over.data.current?.sortable?.containerId;
+    const newStatus = statusColumns.find(s => s === overContainer) as MaintenanceRequestStatus;
+
+    if (newStatus) {
+      setRequests((prevRequests) => {
+        const activeIndex = prevRequests.findIndex((r) => r.id === activeId);
+        if (activeIndex === -1) return prevRequests;
+
+        const updatedRequest = { ...prevRequests[activeIndex], status: newStatus };
+        const newRequests = [...prevRequests];
+        newRequests[activeIndex] = updatedRequest;
+        
+        // Find the index of the item we are over
+        const overIndex = prevRequests.findIndex((r) => r.id === overId);
+
+        // If we are dropping on an item, we reorder. Otherwise, we just update status.
+        if (overIndex !== -1 && active.id !== over.id) {
+           return arrayMove(newRequests, activeIndex, overIndex);
+        }
+
+        return newRequests;
+      });
     }
   };
 
@@ -255,7 +260,7 @@ export default function RequestsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-4 flex-1 overflow-y-auto">
-                 <SortableContext items={filteredRequests.filter(r => r.status === status).map(r => r.id)} strategy={verticalListSortingStrategy}>
+                 <SortableContext items={filteredRequests.filter(r => r.status === status).map(r => r.id)} strategy={verticalListSortingStrategy} id={status}>
                     {filteredRequests
                       .filter((r) => r.status === status)
                       .map((request) => (
