@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
+import Header from "@/components/app/header";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -25,7 +26,10 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Code+Pro&display=swap" rel="stylesheet" />
       </head>
       <body className={cn('font-body antialiased bg-background', inter.variable)}>
-        {children}
+        <div className="flex min-h-screen flex-col">
+          <Header />
+          <main className="p-4 sm:p-6 lg:p-8 flex-1">{children}</main>
+        </div>
         <Toaster />
       </body>
     </html>
