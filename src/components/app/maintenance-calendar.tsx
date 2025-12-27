@@ -102,13 +102,13 @@ export function MaintenanceCalendar({ requests, teams }: { requests: Maintenance
         </div>
       </div>
       <div className="grid grid-cols-7 mt-4 text-xs leading-6 text-center text-muted-foreground">
-        <div>S</div>
-        <div>M</div>
-        <div>T</div>
-        <div>W</div>
-        <div>T</div>
-        <div>F</div>
-        <div>S</div>
+        <div>Su</div>
+        <div>Mo</div>
+        <div>Tu</div>
+        <div>We</div>
+        <div>Th</div>
+        <div>Fr</div>
+        <div>Sa</div>
       </div>
       <div className="grid grid-cols-7 mt-2 text-sm">
         {days.map((day, dayIdx) => (
