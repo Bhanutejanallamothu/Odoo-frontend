@@ -99,13 +99,13 @@ export default function TeamsPage() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
-         <Button onClick={handleAddNew}>
+        <h1 className="text-3xl font-bold tracking-tight font-headline">
+          Maintenance Teams
+        </h1>
+        <Button onClick={handleAddNew}>
           <PlusCircle className="mr-2 h-4 w-4" />
           New
         </Button>
-        <h1 className="text-3xl font-bold tracking-tight font-headline text-right">
-          Maintenance Teams
-        </h1>
       </div>
       <Card>
         <CardHeader>
