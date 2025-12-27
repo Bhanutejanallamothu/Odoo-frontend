@@ -36,6 +36,7 @@ import {
 import { ArrowLeft, Save, FileText } from 'lucide-react';
 import Link from 'next/link';
 import WorkflowIndicator from '@/components/app/workflow-indicator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function MaintenanceRequestDetailPage() {
   const router = useRouter();
@@ -146,165 +147,178 @@ export default function MaintenanceRequestDetailPage() {
             Update the details of this request below.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor="subject">Subject</Label>
-              <Input
-                id="subject"
-                value={request.subject}
-                onChange={(e) => handleInputChange('subject', e.target.value)}
-              />
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div className="grid gap-2">
+                <Label htmlFor="subject">Subject</Label>
+                <Input
+                  id="subject"
+                  value={request.subject}
+                  onChange={(e) => handleInputChange('subject', e.target.value)}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="equipment">Equipment</Label>
+                <Select
+                  value={request.equipmentId}
+                  onValueChange={handleEquipmentChange}
+                >
+                  <SelectTrigger id="equipment">
+                    <SelectValue placeholder="Select equipment..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {equipment.map((e) => (
+                      <SelectItem key={e.id} value={e.id}>
+                        {e.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+               <div className="grid gap-2">
+                <Label htmlFor="requester">Requester</Label>
+                <Input
+                  id="requester"
+                  value={users.find(u => u.id === request.requesterId)?.name || 'N/A'}
+                  readOnly
+                  className="bg-muted/50"
+                />
+              </div>
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="equipment">Equipment</Label>
-              <Select
-                value={request.equipmentId}
-                onValueChange={handleEquipmentChange}
-              >
-                <SelectTrigger id="equipment">
-                  <SelectValue placeholder="Select equipment..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {equipment.map((e) => (
-                    <SelectItem key={e.id} value={e.id}>
-                      {e.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <div className="space-y-4">
+               <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="status">Status</Label>
+                    <Select
+                      value={request.status}
+                      onValueChange={(v: MaintenanceRequestStatus) => handleSelectChange('status', v)}
+                    >
+                      <SelectTrigger id="status">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="New">New</SelectItem>
+                        <SelectItem value="In Progress">In Progress</SelectItem>
+                        <SelectItem value="Repaired">Repaired</SelectItem>
+                        <SelectItem value="Scrap">Scrap</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                   <div className="grid gap-2">
+                    <Label htmlFor="priority">Priority</Label>
+                    <Select
+                      value={request.priority}
+                      onValueChange={(v: MaintenanceRequestPriority) => handleSelectChange('priority', v)}
+                    >
+                      <SelectTrigger id="priority">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="High">High</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="Low">Low</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+              </div>
 
-             <div className="grid gap-2">
-              <Label htmlFor="requester">Requester</Label>
-              <Input
-                id="requester"
-                value={users.find(u => u.id === request.requesterId)?.name || 'N/A'}
-                readOnly
-                className="bg-muted/50"
-              />
+              <div className="grid grid-cols-2 gap-4">
+                 <div className="grid gap-2">
+                    <Label htmlFor="request-type">Type</Label>
+                    <Select
+                      value={request.requestType}
+                      onValueChange={(v: MaintenanceRequestType) => handleSelectChange('requestType', v)}
+                    >
+                      <SelectTrigger id="request-type">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Corrective">Corrective</SelectItem>
+                        <SelectItem value="Preventive">Preventive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                      <Label htmlFor="due-date">Due Date</Label>
+                      <Input
+                          id="due-date"
+                          type="date"
+                          value={request.dueDate.split('T')[0]}
+                          onChange={(e) => handleInputChange('dueDate', e.target.value)}
+                      />
+                  </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="team">Assigned Team</Label>
+                <Select
+                  value={request.teamId}
+                  onValueChange={(v) => {
+                    handleSelectChange('teamId', v);
+                    handleSelectChange('assignedTechnicianId', 'unassigned'); // Reset tech on team change
+                  }}
+                >
+                  <SelectTrigger id="team">
+                    <SelectValue placeholder="Select team..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {teams.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="technician">Assigned Technician</Label>
+                <Select
+                  value={request.assignedTechnicianId || 'unassigned'}
+                  onValueChange={(v) => handleSelectChange('assignedTechnicianId', v)}
+                  disabled={!request.teamId}
+                >
+                  <SelectTrigger id="technician">
+                    <SelectValue placeholder="Assign a technician..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                    {techniciansForTeam.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="notes">Notes</Label>
-              <Textarea
+          </div>
+          <Tabs defaultValue="notes" className="mt-6">
+            <TabsList>
+              <TabsTrigger value="notes">Notes</TabsTrigger>
+              <TabsTrigger value="instructions">Instructions</TabsTrigger>
+            </TabsList>
+            <TabsContent value="notes">
+               <Textarea
                 id="notes"
                 value={request.notes || ''}
                 onChange={(e) => handleInputChange('notes', e.target.value)}
                 placeholder="Add any relevant notes..."
+                className="mt-2"
               />
-            </div>
-          </div>
-
-          <div className="space-y-4">
-             <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select
-                    value={request.status}
-                    onValueChange={(v: MaintenanceRequestStatus) => handleSelectChange('status', v)}
-                  >
-                    <SelectTrigger id="status">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="New">New</SelectItem>
-                      <SelectItem value="In Progress">In Progress</SelectItem>
-                      <SelectItem value="Repaired">Repaired</SelectItem>
-                      <SelectItem value="Scrap">Scrap</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                 <div className="grid gap-2">
-                  <Label htmlFor="priority">Priority</Label>
-                  <Select
-                    value={request.priority}
-                    onValueChange={(v: MaintenanceRequestPriority) => handleSelectChange('priority', v)}
-                  >
-                    <SelectTrigger id="priority">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="High">High</SelectItem>
-                      <SelectItem value="Medium">Medium</SelectItem>
-                      <SelectItem value="Low">Low</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-               <div className="grid gap-2">
-                  <Label htmlFor="request-type">Type</Label>
-                  <Select
-                    value={request.requestType}
-                    onValueChange={(v: MaintenanceRequestType) => handleSelectChange('requestType', v)}
-                  >
-                    <SelectTrigger id="request-type">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Corrective">Corrective</SelectItem>
-                      <SelectItem value="Preventive">Preventive</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                    <Label htmlFor="due-date">Due Date</Label>
-                    <Input
-                        id="due-date"
-                        type="date"
-                        value={request.dueDate.split('T')[0]}
-                        onChange={(e) => handleInputChange('dueDate', e.target.value)}
-                    />
-                </div>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="team">Assigned Team</Label>
-              <Select
-                value={request.teamId}
-                onValueChange={(v) => {
-                  handleSelectChange('teamId', v);
-                  handleSelectChange('assignedTechnicianId', 'unassigned'); // Reset tech on team change
-                }}
-              >
-                <SelectTrigger id="team">
-                  <SelectValue placeholder="Select team..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {teams.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="technician">Assigned Technician</Label>
-              <Select
-                value={request.assignedTechnicianId || 'unassigned'}
-                onValueChange={(v) => handleSelectChange('assignedTechnicianId', v)}
-                disabled={!request.teamId}
-              >
-                <SelectTrigger id="technician">
-                  <SelectValue placeholder="Assign a technician..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="unassigned">Unassigned</SelectItem>
-                  {techniciansForTeam.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-          </div>
+            </TabsContent>
+            <TabsContent value="instructions">
+              <Textarea
+                id="instructions"
+                placeholder="Add step-by-step instructions for the repair..."
+                className="mt-2"
+              />
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>
