@@ -27,7 +27,8 @@ import { NavItem, UserRole } from '@/lib/types';
 const allNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiredRoles: ['admin', 'manager', 'technician'] },
   { href: '/my-requests', label: 'My Requests', icon: ClipboardList, requiredRoles: ['employee'] },
-  { href: '/calendar', label: 'Maintenance Calendar', icon: Calendar, requiredRoles: ['admin', 'manager', 'technician'] },
+  { href: '/requests', label: 'Requests', icon: ClipboardList, requiredRoles: ['admin', 'manager', 'technician'] },
+  { href: '/calendar', label: 'Calendar', icon: Calendar, requiredRoles: ['admin', 'manager', 'technician'] },
   { href: '/equipment', label: 'Equipment', icon: Wrench, requiredRoles: ['admin', 'manager', 'technician'] },
   { href: '/dashboard', label: 'Reporting', icon: LineChart, requiredRoles: ['admin', 'manager'] },
   { href: '/teams', label: 'Teams', icon: Users, requiredRoles: ['admin', 'manager'] },
