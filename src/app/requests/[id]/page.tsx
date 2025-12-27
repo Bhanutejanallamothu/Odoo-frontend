@@ -26,6 +26,7 @@ import {
   equipment,
   users,
   teams,
+  workCenters,
 } from '@/lib/mock-data';
 import {
   MaintenanceRequest,
@@ -53,6 +54,8 @@ export default function MaintenanceRequestDetailPage() {
       const foundRequest = maintenanceRequests.find((r) => r.id === id);
       if (foundRequest) {
         setRequest(foundRequest);
+        // Assuming requests are always for equipment for now, but this could be dynamic
+        setMaintenanceFor(foundRequest.equipmentId ? 'equipment' : 'work_center');
       } else {
         toast({
           variant: 'destructive',
@@ -65,11 +68,7 @@ export default function MaintenanceRequestDetailPage() {
   }, [id, router, toast]);
 
   const handleMaintenanceForChange = (value: string) => {
-    if (value === 'work_center') {
-      router.push('/work-centers');
-    } else {
-      setMaintenanceFor(value);
-    }
+    setMaintenanceFor(value);
   };
 
   const handleInputChange = (
@@ -218,12 +217,16 @@ export default function MaintenanceRequestDetailPage() {
               {maintenanceFor === 'work_center' && (
                  <div className="grid gap-2">
                   <Label htmlFor="work-center">Work Center</Label>
-                   <Select disabled>
+                   <Select>
                       <SelectTrigger id="work-center">
                         <SelectValue placeholder="Select work center..." />
                       </SelectTrigger>
                       <SelectContent>
-                        {/* Future options for work centers */}
+                        {workCenters.map((wc) => (
+                          <SelectItem key={wc.id} value={wc.id}>
+                            {wc.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                    </Select>
                  </div>
