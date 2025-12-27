@@ -15,13 +15,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { users } from '@/lib/mock-data';
+import { login } from '@/lib/api/auth';
 
 export default function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const [email, setEmail] = React.useState('admin@example.com');
+  const [password, setPassword] = React.useState('password');
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -30,30 +30,31 @@ export default function LoginForm() {
     }
   }, []);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // This is a mock authentication. In a real app, you'd call Firebase Auth here.
-    const user = users.find((u) => u.email === email);
+    try {
+      const user = await login(email, password);
 
-    // For this mock, we're not checking the password.
-    // In a real app, you would use signInWithEmailAndPassword from Firebase.
-    if (user) {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('userRole', user.role);
-        localStorage.setItem('userId', user.id);
-      }
+      if (user) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('userRole', user.role);
+          localStorage.setItem('userId', user.id);
+        }
 
-      toast({
-        title: 'Login Successful',
-        description: `Welcome back, ${user.name}!`,
-      });
+        toast({
+          title: 'Login Successful',
+          description: `Welcome back, ${user.name}!`,
+        });
 
-      if (user.role === 'employee') {
-        router.push('/my-requests');
+        if (user.role === 'employee') {
+          router.push('/my-requests');
+        } else {
+          router.push('/dashboard');
+        }
       } else {
-        router.push('/dashboard');
+        throw new Error('Invalid credentials');
       }
-    } else {
+    } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Login Failed',

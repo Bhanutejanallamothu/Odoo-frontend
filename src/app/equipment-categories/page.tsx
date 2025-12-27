@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -25,19 +24,37 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-
-const initialCategories: EquipmentCategory[] = [
-  { id: 'cat-1', name: 'Computers', responsible: 'OdooBot', company: 'My Company (San Francisco)' },
-  { id: 'cat-2', name: 'Software', responsible: 'OdooBot', company: 'My Company (San Francisco)' },
-  { id: 'cat-3', name: 'Monitors', responsible: 'Mitchell Admin', company: 'My Company (San Francisco)' },
-];
+import { Skeleton } from '@/components/ui/skeleton';
+import { getEquipmentCategories, createEquipmentCategory, updateEquipmentCategory, deleteEquipmentCategory } from '@/lib/api/equipment-categories';
 
 export default function EquipmentCategoriesPage() {
   const { toast } = useToast();
-  const [categories, setCategories] = React.useState<EquipmentCategory[]>(initialCategories);
+  const [categories, setCategories] = React.useState<EquipmentCategory[]>([]);
+  const [loading, setLoading] = React.useState(true);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
-  const [currentCategory, setCurrentCategory] = React.useState<EquipmentCategory | null>(null);
+  const [currentCategory, setCurrentCategory] =
+    React.useState<EquipmentCategory | null>(null);
+
+  React.useEffect(() => {
+    const fetchCategories = async () => {
+      setLoading(true);
+      try {
+        const data = await getEquipmentCategories();
+        setCategories(data);
+      } catch (error) {
+        console.error('Failed to fetch categories', error);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to load equipment categories.',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, [toast]);
 
   const handleAddNew = () => {
     setCurrentCategory(null);
@@ -54,40 +71,63 @@ export default function EquipmentCategoriesPage() {
     setIsDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    if (currentCategory) {
-      setCategories(categories.filter(cat => cat.id !== currentCategory.id));
+  const confirmDelete = async () => {
+    if (!currentCategory) return;
+
+    try {
+      await deleteEquipmentCategory(currentCategory.id);
+      setCategories((prev) =>
+        prev.filter((cat) => cat.id !== currentCategory.id)
+      );
       toast({
         title: 'Category Deleted',
         description: `"${currentCategory.name}" has been successfully deleted.`,
       });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Delete Failed',
+        description: 'Could not delete the category.',
+      });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setCurrentCategory(null);
     }
-    setIsDeleteDialogOpen(false);
-    setCurrentCategory(null);
   };
 
-  const handleSave = (formData: Omit<EquipmentCategory, 'id'>) => {
-    if (currentCategory) {
-      // Edit existing
-      setCategories(categories.map(cat => cat.id === currentCategory.id ? { ...currentCategory, ...formData } : cat));
+  const handleSave = async (formData: Omit<EquipmentCategory, 'id'>) => {
+    const isEditing = !!currentCategory;
+
+    try {
+        if (isEditing) {
+            const savedCategory = await updateEquipmentCategory(currentCategory.id, formData);
+            setCategories((prev) =>
+              prev.map((cat) =>
+                cat.id === savedCategory.id ? savedCategory : cat
+              )
+            );
+            toast({
+              title: 'Category Updated',
+              description: `"${savedCategory.name}" has been successfully updated.`,
+            });
+        } else {
+            const savedCategory = await createEquipmentCategory(formData);
+            setCategories((prev) => [savedCategory, ...prev]);
+            toast({
+              title: 'Category Created',
+              description: `"${savedCategory.name}" has been successfully created.`,
+            });
+        }
+    } catch (error) {
       toast({
-        title: 'Category Updated',
-        description: `"${formData.name}" has been successfully updated.`,
+        variant: 'destructive',
+        title: 'Save Failed',
+        description: 'Could not save the category.',
       });
-    } else {
-      // Add new
-      const newCategory: EquipmentCategory = {
-        id: `cat-${Date.now()}`,
-        ...formData
-      };
-      setCategories([newCategory, ...categories]);
-      toast({
-        title: 'Category Created',
-        description: `"${formData.name}" has been successfully created.`,
-      });
+    } finally {
+      setIsModalOpen(false);
+      setCurrentCategory(null);
     }
-    setIsModalOpen(false);
-    setCurrentCategory(null);
   };
 
   return (
@@ -108,11 +148,19 @@ export default function EquipmentCategoriesPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <EquipmentCategoryTable
-            categories={categories}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
+          {loading ? (
+             <div className="space-y-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+            </div>
+          ) : (
+            <EquipmentCategoryTable
+              categories={categories}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
         </CardContent>
       </Card>
 
@@ -122,19 +170,24 @@ export default function EquipmentCategoriesPage() {
         onSave={handleSave}
         category={currentCategory}
       />
-      
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the category
-              "{currentCategory?.name}".
+              This action cannot be undone. This will permanently delete the
+              category "{currentCategory?.name}".
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Continue</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete}>
+              Continue
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

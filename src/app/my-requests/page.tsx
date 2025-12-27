@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -21,12 +20,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import {
-  maintenanceRequests as initialRequests,
-  equipment,
-  teams,
-  users,
-} from '@/lib/mock-data';
-import { MaintenanceRequest, Equipment, MaintenanceRequestStatus } from '@/lib/types';
+  MaintenanceRequest,
+  Equipment,
+  Team,
+  User,
+} from '@/lib/types';
 import {
   Dialog,
   DialogContent,
@@ -42,16 +40,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import { createRequest, getRequests } from '@/lib/api/requests';
+import { getAllEquipment } from '@/lib/api/equipment';
+import { getTeams } from '@/lib/api/teams';
+import { getUsers } from '@/lib/api/users';
 
 export default function MyRequestsPage() {
   const { toast } = useToast();
-  const [requests, setRequests] = React.useState<MaintenanceRequest[]>(initialRequests);
+  const [requests, setRequests] = React.useState<MaintenanceRequest[]>([]);
+  const [equipment, setEquipment] = React.useState<Equipment[]>([]);
+  const [teams, setTeams] = React.useState<Team[]>([]);
+  const [users, setUsers] = React.useState<User[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [newRequest, setNewRequest] = React.useState<Partial<MaintenanceRequest>>({});
+  const [newRequest, setNewRequest] = React.useState<
+    Partial<MaintenanceRequest>
+  >({});
   const [userId, setUserId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -61,10 +71,37 @@ export default function MyRequestsPage() {
     }
   }, []);
 
-  const myRequests = React.useMemo(() => {
-    if (!userId) return [];
-    return requests.filter((r) => r.requesterId === userId);
-  }, [requests, userId]);
+  React.useEffect(() => {
+    const fetchData = async () => {
+      if (!userId) return;
+      setLoading(true);
+      try {
+        const [requestsData, equipmentData, teamsData, usersData] = await Promise.all([
+          getRequests({requesterId: userId}),
+          getAllEquipment(),
+          getTeams(),
+          getUsers(),
+        ]);
+
+        setRequests(requestsData);
+        setEquipment(equipmentData);
+        setTeams(teamsData);
+        setUsers(usersData);
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to load your requests.',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [userId, toast]);
+
 
   const handleCreateRequest = async () => {
     if (!newRequest.subject || !newRequest.equipmentId) {
@@ -75,31 +112,41 @@ export default function MyRequestsPage() {
       });
       return;
     }
-    
-    const selectedEquipment = equipment.find(e => e.id === newRequest.equipmentId);
 
-    const newId = `req-${requests.length + 1}`;
-    const requestToAdd: MaintenanceRequest = {
-      ...newRequest,
-      id: newId,
+    const selectedEquipment = equipment.find(
+      (e) => e.id === newRequest.equipmentId
+    );
+
+    const requestToAdd = {
+      subject: newRequest.subject,
+      equipmentId: newRequest.equipmentId,
       status: 'New',
       requestType: 'Corrective',
-      priority: 'Medium', // Default priority for user-created requests
+      priority: 'Medium',
       teamId: selectedEquipment!.maintenanceTeamId,
       requesterId: userId!,
-      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // Default due date
-      assignedTechnicianId: '' // Unassigned initially
-    } as MaintenanceRequest;
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      assignedTechnicianId: '',
+    } as Omit<MaintenanceRequest, 'id'>;
 
+    try {
+        const createdRequest = await createRequest(requestToAdd);
+        setRequests((prev) => [createdRequest, ...prev]);
+        setIsModalOpen(false);
+        setNewRequest({});
 
-    setRequests(prev => [requestToAdd, ...prev]);
-    setIsModalOpen(false);
-    setNewRequest({});
-
-    toast({
-      title: 'Success',
-      description: 'New maintenance request submitted.',
-    });
+        toast({
+            title: 'Success',
+            description: 'New maintenance request submitted.',
+        });
+    } catch (error) {
+        console.error(error);
+        toast({
+            variant: 'destructive',
+            title: 'Submission Failed',
+            description: 'Could not submit new request.'
+        })
+    }
   };
 
   const statusColors: { [key: string]: string } = {
@@ -128,6 +175,13 @@ export default function MyRequestsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+            {loading ? (
+                <div className="space-y-2">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                </div>
+            ) : (
           <Table>
             <TableHeader>
               <TableRow>
@@ -139,8 +193,8 @@ export default function MyRequestsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {myRequests.length > 0 ? (
-                myRequests.map((req) => (
+              {requests.length > 0 ? (
+                requests.map((req) => (
                   <TableRow key={req.id}>
                     <TableCell className="font-medium">{req.subject}</TableCell>
                     <TableCell>
@@ -148,7 +202,11 @@ export default function MyRequestsPage() {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="border-0">
-                        <span className={`h-2 w-2 rounded-full mr-2 ${statusColors[req.status]}`}></span>
+                        <span
+                          className={`h-2 w-2 rounded-full mr-2 ${
+                            statusColors[req.status]
+                          }`}
+                        ></span>
                         {req.status}
                       </Badge>
                     </TableCell>
@@ -156,7 +214,8 @@ export default function MyRequestsPage() {
                       {new Date(req.dueDate).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      {users.find(u => u.id === req.assignedTechnicianId)?.name || 'Unassigned'}
+                      {users.find((u) => u.id === req.assignedTechnicianId)
+                        ?.name || 'Unassigned'}
                     </TableCell>
                   </TableRow>
                 ))
@@ -169,6 +228,7 @@ export default function MyRequestsPage() {
               )}
             </TableBody>
           </Table>
+          )}
         </CardContent>
       </Card>
 
@@ -188,21 +248,25 @@ export default function MyRequestsPage() {
               <Select
                 value={newRequest.equipmentId}
                 onValueChange={(value) => {
-                    const selectedEquipment = equipment.find(e => e.id === value);
-                    if (selectedEquipment) {
-                      setNewRequest({ 
-                          ...newRequest, 
-                          equipmentId: value, 
-                      });
-                    }
+                  const selectedEquipment = equipment.find(
+                    (e) => e.id === value
+                  );
+                  if (selectedEquipment) {
+                    setNewRequest({
+                      ...newRequest,
+                      equipmentId: value,
+                    });
+                  }
                 }}
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select equipment" />
                 </SelectTrigger>
                 <SelectContent>
-                  {equipment.map(e => (
-                    <SelectItem key={e.id} value={e.id}>{e.name} ({e.location})</SelectItem>
+                  {equipment.map((e) => (
+                    <SelectItem key={e.id} value={e.id}>
+                      {e.name} ({e.location})
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -214,25 +278,39 @@ export default function MyRequestsPage() {
               <Textarea
                 id="subject"
                 value={newRequest.subject || ''}
-                onChange={(e) => setNewRequest({ ...newRequest, subject: e.target.value })}
+                onChange={(e) =>
+                  setNewRequest({ ...newRequest, subject: e.target.value })
+                }
                 className="col-span-3"
                 placeholder="e.g., 'Leaking oil' or 'Printer not responding'"
               />
             </div>
-             <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="team" className="text-right">
                 Team
               </Label>
-               <Input
+              <Input
                 id="team"
                 readOnly
-                value={newRequest.equipmentId ? teams.find(t => t.id === equipment.find(e => e.id === newRequest.equipmentId)?.maintenanceTeamId)?.name : 'Auto-assigned'}
+                value={
+                  newRequest.equipmentId
+                    ? teams.find(
+                        (t) =>
+                          t.id ===
+                          equipment.find(
+                            (e) => e.id === newRequest.equipmentId
+                          )?.maintenanceTeamId
+                      )?.name
+                    : 'Auto-assigned'
+                }
                 className="col-span-3 bg-muted/50"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
             <Button onClick={handleCreateRequest}>Submit Request</Button>
           </DialogFooter>
         </DialogContent>

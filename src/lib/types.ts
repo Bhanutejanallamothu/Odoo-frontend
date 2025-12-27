@@ -66,7 +66,7 @@ export type MaintenanceRequest = {
   duration?: number; // hours
   notes?: string;
   teamId: string;
-  requesterId?: string;
+  requesterId: string;
 };
 
 export type WorkCenter = {

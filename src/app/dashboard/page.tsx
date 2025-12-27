@@ -24,17 +24,42 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import {
-  maintenanceRequests,
-  equipment as allEquipment,
-  users,
-} from '@/lib/mock-data';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { MaintenanceRequest, Equipment, User } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
+import { getRequests } from '@/lib/api/requests';
+import { getAllEquipment } from '@/lib/api/equipment';
+import { getUsers } from '@/lib/api/users';
 
 export default function DashboardPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = React.useState('');
+  const [maintenanceRequests, setMaintenanceRequests] = React.useState<MaintenanceRequest[]>([]);
+  const [allEquipment, setAllEquipment] = React.useState<Equipment[]>([]);
+  const [users, setUsers] = React.useState<User[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [requests, equipment, users] = await Promise.all([
+          getRequests(),
+          getAllEquipment(),
+          getUsers(),
+        ]);
+        setMaintenanceRequests(requests);
+        setAllEquipment(equipment);
+        setUsers(users);
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const openRequests = maintenanceRequests.filter(
     (r) => r.status === 'New' || r.status === 'In Progress'
@@ -55,10 +80,30 @@ export default function DashboardPage() {
     technicians.length > 0
       ? Math.round((assignedTechnicians.size / technicians.length) * 100)
       : 0;
-      
+
   const handleRowClick = (requestId: string) => {
     router.push(`/requests/${requestId}`);
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-8">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-9 w-48" />
+        </div>
+        <div className="flex justify-between items-center gap-4">
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-full max-w-sm" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Skeleton className="h-28" />
+          <Skeleton className="h-28" />
+          <Skeleton className="h-28" />
+        </div>
+        <Skeleton className="h-64" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -69,7 +114,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="flex justify-between items-center gap-4">
-         <Button asChild>
+        <Button asChild>
           <Link href="/requests/new">
             <PlusCircle className="mr-2 h-4 w-4" /> New
           </Link>
@@ -133,7 +178,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-      
+
       <Card className="bg-card shadow-soft rounded-lg">
         <CardContent className="p-0">
           <Table>
@@ -148,35 +193,49 @@ export default function DashboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-                {maintenanceRequests.slice(0, 5).map(request => {
-                    const employee = users.find(u => u.id === request.requesterId);
-                    const technician = users.find(u => u.id === request.assignedTechnicianId);
-                    const equip = allEquipment.find(e => e.id === request.equipmentId);
-                    
-                    const statusVariant: { [key: string]: 'outline' | 'secondary' | 'default' | 'destructive'} = {
-                        'New': 'outline',
-                        'In Progress': 'secondary',
-                        'Repaired': 'default',
-                        'Scrap': 'destructive'
-                    };
+              {maintenanceRequests.slice(0, 5).map((request) => {
+                const employee = users.find((u) => u.id === request.requesterId);
+                const technician = users.find(
+                  (u) => u.id === request.assignedTechnicianId
+                );
+                const equip = allEquipment.find(
+                  (e) => e.id === request.equipmentId
+                );
 
-                    return (
-                      <TableRow 
-                        key={request.id} 
-                        className="border-t border-dashed cursor-pointer"
-                        onClick={() => handleRowClick(request.id)}
-                      >
-                        <TableCell>{request.subject}</TableCell>
-                        <TableCell>{employee?.name || 'N/A'}</TableCell>
-                        <TableCell>{technician?.name || 'Unassigned'}</TableCell>
-                        <TableCell>{equip?.category || 'N/A'}</TableCell>
-                        <TableCell>
-                            <Badge variant={statusVariant[request.status]}>{request.status}</Badge>
-                        </TableCell>
-                        <TableCell>GearGuard Inc.</TableCell>
-                      </TableRow>
-                    );
-                })}
+                const statusVariant: {
+                  [key: string]:
+                    | 'outline'
+                    | 'secondary'
+                    | 'default'
+                    | 'destructive';
+                } = {
+                  New: 'outline',
+                  'In Progress': 'secondary',
+                  Repaired: 'default',
+                  Scrap: 'destructive',
+                };
+
+                return (
+                  <TableRow
+                    key={request.id}
+                    className="border-t border-dashed cursor-pointer"
+                    onClick={() => handleRowClick(request.id)}
+                  >
+                    <TableCell>{request.subject}</TableCell>
+                    <TableCell>{employee?.name || 'N/A'}</TableCell>
+                    <TableCell>
+                      {technician?.name || 'Unassigned'}
+                    </TableCell>
+                    <TableCell>{equip?.category || 'N/A'}</TableCell>
+                    <TableCell>
+                      <Badge variant={statusVariant[request.status]}>
+                        {request.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>GearGuard Inc.</TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>

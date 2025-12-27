@@ -1,8 +1,21 @@
-"use client";
+'use client';
 import * as React from 'react';
 import { useSearchParams } from 'next/navigation';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { PlusCircle, ListFilter } from 'lucide-react';
 
 import {
@@ -21,8 +34,14 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 
-import { maintenanceRequests as initialRequests, teams, users, equipment } from '@/lib/mock-data';
-import { MaintenanceRequest, MaintenanceRequestStatus, MaintenanceRequestPriority } from '@/lib/types';
+import {
+  MaintenanceRequest,
+  MaintenanceRequestStatus,
+  MaintenanceRequestPriority,
+  Team,
+  User,
+  Equipment,
+} from '@/lib/types';
 import RequestCard from './_components/request-card';
 import {
   Dialog,
@@ -42,12 +61,24 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
+import { getRequests, createRequest, updateRequest } from '@/lib/api/requests';
+import { getTeams } from '@/lib/api/teams';
+import { getUsers } from '@/lib/api/users';
+import { getAllEquipment } from '@/lib/api/equipment';
 
-const statusColumns: MaintenanceRequestStatus[] = ['New', 'In Progress', 'Repaired', 'Scrap'];
-
+const statusColumns: MaintenanceRequestStatus[] = [
+  'New',
+  'In Progress',
+  'Repaired',
+  'Scrap',
+];
 
 // This wrapper ensures DndContext only renders on the client.
-function ClientOnlyDndContext({ children, ...props }: React.ComponentProps<typeof DndContext> & {children: React.ReactNode}) {
+function ClientOnlyDndContext({
+  children,
+  ...props
+}: React.ComponentProps<typeof DndContext> & { children: React.ReactNode }) {
   const [isClient, setIsClient] = React.useState(false);
 
   React.useEffect(() => {
@@ -61,14 +92,20 @@ function ClientOnlyDndContext({ children, ...props }: React.ComponentProps<typeo
   return <DndContext {...props}>{children}</DndContext>;
 }
 
-
 export default function RequestsPage() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
 
-  const [requests, setRequests] = React.useState<MaintenanceRequest[]>(initialRequests);
+  const [requests, setRequests] = React.useState<MaintenanceRequest[]>([]);
+  const [teams, setTeams] = React.useState<Team[]>([]);
+  const [users, setUsers] = React.useState<User[]>([]);
+  const [equipment, setEquipment] = React.useState<Equipment[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [newRequest, setNewRequest] = React.useState<Partial<MaintenanceRequest>>({
+  const [newRequest, setNewRequest] = React.useState<
+    Partial<MaintenanceRequest>
+  >({
     status: 'New',
     requestType: 'Corrective',
     priority: 'Medium',
@@ -78,74 +115,131 @@ export default function RequestsPage() {
 
   const [teamFilter, setTeamFilter] = React.useState<string[]>([]);
   const [technicianFilter, setTechnicianFilter] = React.useState<string[]>([]);
-  const [requestTypeFilter, setRequestTypeFilter] = React.useState<string[]>([]);
-  
+  const [requestTypeFilter, setRequestTypeFilter] = React.useState<string[]>(
+    []
+  );
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [requestsData, teamsData, usersData, equipmentData] =
+          await Promise.all([
+            getRequests(),
+            getTeams(),
+            getUsers(),
+            getAllEquipment(),
+          ]);
+
+        setRequests(requestsData);
+        setTeams(teamsData);
+        setUsers(usersData);
+        setEquipment(equipmentData);
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to load data from the server.',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [toast]);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-  
+
   const filteredRequests = React.useMemo(() => {
     let result = requests;
     if (equipmentIdParam) {
-      result = result.filter(r => r.equipmentId === equipmentIdParam);
+      result = result.filter((r) => r.equipmentId === equipmentIdParam);
     }
     if (teamFilter.length > 0) {
-      result = result.filter(r => teamFilter.includes(r.teamId));
+      result = result.filter((r) => teamFilter.includes(r.teamId));
     }
     if (technicianFilter.length > 0) {
-      result = result.filter(r => technicianFilter.includes(r.assignedTechnicianId));
+      result = result.filter((r) =>
+        technicianFilter.includes(r.assignedTechnicianId)
+      );
     }
     if (requestTypeFilter.length > 0) {
-      result = result.filter(r => requestTypeFilter.includes(r.requestType));
+      result = result.filter((r) => requestTypeFilter.includes(r.requestType));
     }
     return result;
-  }, [requests, equipmentIdParam, teamFilter, technicianFilter, requestTypeFilter]);
+  }, [
+    requests,
+    equipmentIdParam,
+    teamFilter,
+    technicianFilter,
+    requestTypeFilter,
+  ]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-  
+
     if (!over) return;
-  
+
     const activeId = String(active.id);
     const overId = String(over.id);
     const activeContainer = active.data.current?.sortable.containerId;
     const overContainer = over.data.current?.sortable?.containerId || over.id;
-  
+
     if (activeContainer !== overContainer) {
-      setRequests((prev) => {
-        const activeIndex = prev.findIndex((r) => r.id === activeId);
-        if (activeIndex === -1) return prev;
-  
-        const newStatus = overContainer as MaintenanceRequestStatus;
-        const newRequests = [...prev];
-        const updatedRequest = {
-          ...newRequests[activeIndex],
-          status: newStatus,
-        };
-        newRequests[activeIndex] = updatedRequest;
-        
-        // This is a simplified version; for a real app, you might want to re-sort
-        // or handle placement within the new column more explicitly.
-        // For now, we'll just update the status.
-        return newRequests; 
-      });
+      const newStatus = overContainer as MaintenanceRequestStatus;
+      const originalRequest = requests.find(r => r.id === activeId);
+      if (!originalRequest) return;
+
+      setRequests((prev) =>
+        prev.map((r) => (r.id === activeId ? { ...r, status: newStatus } : r))
+      );
+
+      try {
+        const updatedRequest = await updateRequest(activeId, { status: newStatus });
+        setRequests((prev) =>
+          prev.map((r) => (r.id === activeId ? updatedRequest : r))
+        );
+        toast({
+          title: 'Status Updated',
+          description: `Request moved to ${newStatus}.`,
+        });
+      } catch (error) {
+        console.error(error);
+        toast({
+          variant: 'destructive',
+          title: 'Update Failed',
+          description: 'Could not update request status.',
+        });
+        // Revert UI change
+        setRequests((prev) =>
+          prev.map((r) =>
+            r.id === activeId ? originalRequest : r
+          )
+        );
+      }
     } else {
-        setRequests((prev) => {
-            const activeIndex = prev.findIndex((r) => r.id === activeId);
-            const overIndex = prev.findIndex((r) => r.id === overId);
-            if (activeIndex !== -1 && overIndex !== -1) {
-              return arrayMove(prev, activeIndex, overIndex);
-            }
-            return prev;
-          });
+      const activeIndex = requests.findIndex((r) => r.id === activeId);
+      const overIndex = requests.findIndex((r) => r.id === overId);
+      if (activeIndex !== -1 && overIndex !== -1) {
+        setRequests((prev) => arrayMove(prev, activeIndex, overIndex));
+      }
     }
   };
 
   const handleCreateRequest = async () => {
-    if (!newRequest.subject || !newRequest.equipmentId || !newRequest.dueDate || !newRequest.teamId || !newRequest.assignedTechnicianId) {
+    if (
+      !newRequest.subject ||
+      !newRequest.equipmentId ||
+      !newRequest.dueDate ||
+      !newRequest.teamId ||
+      !newRequest.assignedTechnicianId
+    ) {
       toast({
         variant: 'destructive',
         title: 'Missing Information',
@@ -153,46 +247,83 @@ export default function RequestsPage() {
       });
       return;
     }
-    
-    const newId = `req-${requests.length + 1}`;
-    const requestToAdd: MaintenanceRequest = {
-      ...newRequest,
-      id: newId,
-    } as MaintenanceRequest;
 
-    if (requestToAdd.requestType === 'Preventive') {
-      requestToAdd.scheduledDate = newRequest.dueDate;
+    try {
+      const requestToCreate = {
+        ...newRequest,
+        ...(newRequest.requestType === 'Preventive' && {
+          scheduledDate: newRequest.dueDate,
+        }),
+      } as Omit<MaintenanceRequest, 'id'>;
+
+      const createdRequest = await createRequest(requestToCreate);
+      setRequests((prev) => [createdRequest, ...prev]);
+      setIsModalOpen(false);
+      setNewRequest({
+        status: 'New',
+        requestType: 'Corrective',
+        priority: 'Medium',
+      });
+
+      toast({
+        title: 'Success',
+        description: 'New maintenance request created.',
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        title: 'Creation Failed',
+        description: 'Could not create the new request.',
+      });
     }
-
-    setRequests(prev => [requestToAdd, ...prev]);
-    setIsModalOpen(false);
-    setNewRequest({ status: 'New', requestType: 'Corrective', priority: 'Medium' });
-
-    toast({
-      title: 'Success',
-      description: 'New maintenance request created.',
-    });
   };
 
-  const techniciansForFilter = users.filter(u => u.role === 'technician');
+  const techniciansForFilter = users.filter((u) => u.role === 'technician');
+  
+  if (loading) {
+    return (
+        <div className="flex flex-col gap-8 h-full">
+            <div className="flex items-center justify-between">
+                <Skeleton className="h-9 w-64" />
+                <div className="flex items-center gap-2">
+                    <Skeleton className="h-10 w-24" />
+                    <Skeleton className="h-10 w-36" />
+                </div>
+            </div>
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
+                {statusColumns.map(status => (
+                    <div key={status} className="flex flex-col gap-4">
+                        <Skeleton className="h-12 w-full" />
+                        <Skeleton className="h-32 w-full" />
+                        <Skeleton className="h-32 w-full" />
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-8 h-full">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-2">
-           <h1 className="text-3xl font-bold tracking-tight font-headline">
+          <h1 className="text-3xl font-bold tracking-tight font-headline">
             Maintenance Requests
           </h1>
           {equipmentIdParam && (
-             <p className="text-muted-foreground">
-                Showing requests for: {equipment.find(e => e.id === equipmentIdParam)?.name}
+            <p className="text-muted-foreground">
+              Showing requests for:{' '}
+              {equipment.find((e) => e.id === equipmentIdParam)?.name}
             </p>
           )}
         </div>
         <div className="flex items-center gap-2">
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline"><ListFilter className="mr-2 h-4 w-4" /> Filter</Button>
+              <Button variant="outline">
+                <ListFilter className="mr-2 h-4 w-4" /> Filter
+              </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80">
               <div className="grid gap-4">
@@ -204,13 +335,17 @@ export default function RequestsPage() {
                 </div>
                 <div className="grid gap-2">
                   <h5 className="text-sm font-medium">Team</h5>
-                  {teams.map(team => (
+                  {teams.map((team) => (
                     <div key={team.id} className="flex items-center space-x-2">
                       <Checkbox
                         id={`team-${team.id}`}
                         checked={teamFilter.includes(team.id)}
                         onCheckedChange={(checked) => {
-                          setTeamFilter(prev => checked ? [...prev, team.id] : prev.filter(t => t !== team.id))
+                          setTeamFilter((prev) =>
+                            checked
+                              ? [...prev, team.id]
+                              : prev.filter((t) => t !== team.id)
+                          );
                         }}
                       />
                       <Label htmlFor={`team-${team.id}`}>{team.name}</Label>
@@ -219,28 +354,36 @@ export default function RequestsPage() {
                 </div>
                 <div className="grid gap-2">
                   <h5 className="text-sm font-medium">Technician</h5>
-                  {techniciansForFilter.map(tech => (
+                  {techniciansForFilter.map((tech) => (
                     <div key={tech.id} className="flex items-center space-x-2">
                       <Checkbox
                         id={`tech-${tech.id}`}
                         checked={technicianFilter.includes(tech.id)}
                         onCheckedChange={(checked) => {
-                          setTechnicianFilter(prev => checked ? [...prev, tech.id] : prev.filter(t => t !== tech.id))
+                          setTechnicianFilter((prev) =>
+                            checked
+                              ? [...prev, tech.id]
+                              : prev.filter((t) => t !== tech.id)
+                          );
                         }}
                       />
                       <Label htmlFor={`tech-${tech.id}`}>{tech.name}</Label>
                     </div>
                   ))}
                 </div>
-                 <div className="grid gap-2">
+                <div className="grid gap-2">
                   <h5 className="text-sm font-medium">Request Type</h5>
-                  {['Corrective', 'Preventive'].map(type => (
+                  {['Corrective', 'Preventive'].map((type) => (
                     <div key={type} className="flex items-center space-x-2">
                       <Checkbox
                         id={`type-${type}`}
                         checked={requestTypeFilter.includes(type)}
                         onCheckedChange={(checked) => {
-                          setRequestTypeFilter(prev => checked ? [...prev, type] : prev.filter(t => t !== type))
+                          setRequestTypeFilter((prev) =>
+                            checked
+                              ? [...prev, type]
+                              : prev.filter((t) => t !== type)
+                          );
                         }}
                       />
                       <Label htmlFor={`type-${type}`}>{type}</Label>
@@ -255,37 +398,54 @@ export default function RequestsPage() {
           </Button>
         </div>
       </div>
-      
+
       <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
-        <ClientOnlyDndContext sensors={sensors} onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
+        <ClientOnlyDndContext
+          sensors={sensors}
+          onDragEnd={handleDragEnd}
+          collisionDetection={closestCenter}
+        >
           {statusColumns.map((status) => (
             <Card key={status} className="flex flex-col h-full bg-card/50">
               <CardHeader>
                 <CardTitle>{status}</CardTitle>
                 <CardDescription>
-                  {filteredRequests.filter((r) => r.status === status).length} requests
+                  {
+                    filteredRequests.filter((r) => r.status === status).length
+                  }{' '}
+                  requests
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-4 flex-1 overflow-y-auto">
-                 <SortableContext items={filteredRequests.filter(r => r.status === status).map(r => r.id)} strategy={verticalListSortingStrategy} id={status}>
-                    {filteredRequests
-                      .filter((r) => r.status === status)
-                      .map((request) => (
-                        <RequestCard
-                          key={request.id}
-                          request={request}
-                          user={users.find(u => u.id === request.assignedTechnicianId)}
-                          equipment={equipment.find(e => e.id === request.equipmentId)}
-                        />
-                      ))}
-                 </SortableContext>
+                <SortableContext
+                  items={filteredRequests
+                    .filter((r) => r.status === status)
+                    .map((r) => r.id)}
+                  strategy={verticalListSortingStrategy}
+                  id={status}
+                >
+                  {filteredRequests
+                    .filter((r) => r.status === status)
+                    .map((request) => (
+                      <RequestCard
+                        key={request.id}
+                        request={request}
+                        user={users.find(
+                          (u) => u.id === request.assignedTechnicianId
+                        )}
+                        equipment={equipment.find(
+                          (e) => e.id === request.equipmentId
+                        )}
+                      />
+                    ))}
+                </SortableContext>
               </CardContent>
             </Card>
           ))}
         </ClientOnlyDndContext>
       </div>
 
-       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Create Maintenance Request</DialogTitle>
@@ -301,7 +461,9 @@ export default function RequestsPage() {
               <Input
                 id="subject"
                 value={newRequest.subject || ''}
-                onChange={(e) => setNewRequest({ ...newRequest, subject: e.target.value })}
+                onChange={(e) =>
+                  setNewRequest({ ...newRequest, subject: e.target.value })
+                }
                 className="col-span-3"
               />
             </div>
@@ -312,33 +474,39 @@ export default function RequestsPage() {
               <Select
                 value={newRequest.equipmentId}
                 onValueChange={(value) => {
-                    const selectedEquipment = equipment.find(e => e.id === value);
-                    if (selectedEquipment) {
-                      setNewRequest({ 
-                          ...newRequest, 
-                          equipmentId: value, 
-                          teamId: selectedEquipment.maintenanceTeamId 
-                      });
-                    }
+                  const selectedEquipment = equipment.find(
+                    (e) => e.id === value
+                  );
+                  if (selectedEquipment) {
+                    setNewRequest({
+                      ...newRequest,
+                      equipmentId: value,
+                      teamId: selectedEquipment.maintenanceTeamId,
+                    });
+                  }
                 }}
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select equipment" />
                 </SelectTrigger>
                 <SelectContent>
-                  {equipment.map(e => (
-                    <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
+                  {equipment.map((e) => (
+                    <SelectItem key={e.id} value={e.id}>
+                      {e.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-             <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="request-type" className="text-right">
                 Type
               </Label>
               <Select
                 value={newRequest.requestType}
-                onValueChange={(value: 'Corrective' | 'Preventive') => setNewRequest({ ...newRequest, requestType: value })}
+                onValueChange={(value: 'Corrective' | 'Preventive') =>
+                  setNewRequest({ ...newRequest, requestType: value })
+                }
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select type" />
@@ -349,13 +517,15 @@ export default function RequestsPage() {
                 </SelectContent>
               </Select>
             </div>
-             <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="priority" className="text-right">
                 Priority
               </Label>
               <Select
                 value={newRequest.priority}
-                onValueChange={(value: MaintenanceRequestPriority) => setNewRequest({ ...newRequest, priority: value })}
+                onValueChange={(value: MaintenanceRequestPriority) =>
+                  setNewRequest({ ...newRequest, priority: value })
+                }
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select priority" />
@@ -363,19 +533,25 @@ export default function RequestsPage() {
                 <SelectContent>
                   <SelectItem value="High">High</SelectItem>
                   <SelectItem value="Medium">Medium</SelectItem>
-                   <SelectItem value="Low">Low</SelectItem>
+                  <SelectItem value="Low">Low</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="due-date" className="text-right">
-                {newRequest.requestType === 'Preventive' ? 'Scheduled Date' : 'Due Date'}
+                {newRequest.requestType === 'Preventive'
+                  ? 'Scheduled Date'
+                  : 'Due Date'}
               </Label>
               <Input
                 id="due-date"
                 type="date"
-                value={newRequest.dueDate ? newRequest.dueDate.split('T')[0] : ''}
-                onChange={(e) => setNewRequest({ ...newRequest, dueDate: e.target.value })}
+                value={
+                  newRequest.dueDate ? newRequest.dueDate.split('T')[0] : ''
+                }
+                onChange={(e) =>
+                  setNewRequest({ ...newRequest, dueDate: e.target.value })
+                }
                 className="col-span-3"
               />
             </div>
@@ -385,34 +561,52 @@ export default function RequestsPage() {
               </Label>
               <Select
                 value={newRequest.teamId}
-                onValueChange={(value) => setNewRequest({ ...newRequest, teamId: value, assignedTechnicianId: undefined })}
+                onValueChange={(value) =>
+                  setNewRequest({
+                    ...newRequest,
+                    teamId: value,
+                    assignedTechnicianId: undefined,
+                  })
+                }
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select team" />
                 </SelectTrigger>
                 <SelectContent>
-                  {teams.map(t => (
-                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                  {teams.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-             <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="technician" className="text-right">
                 Technician
               </Label>
               <Select
                 value={newRequest.assignedTechnicianId}
-                onValueChange={(value) => setNewRequest({ ...newRequest, assignedTechnicianId: value })}
+                onValueChange={(value) =>
+                  setNewRequest({ ...newRequest, assignedTechnicianId: value })
+                }
                 disabled={!newRequest.teamId}
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select technician" />
                 </SelectTrigger>
                 <SelectContent>
-                  {users.filter(u => u.teamId === newRequest.teamId && u.role === 'technician').map(u => (
-                    <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
-                  ))}
+                  {users
+                    .filter(
+                      (u) =>
+                        u.teamId === newRequest.teamId &&
+                        u.role === 'technician'
+                    )
+                    .map((u) => (
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.name}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -423,31 +617,39 @@ export default function RequestsPage() {
               <Textarea
                 id="notes"
                 value={newRequest.notes || ''}
-                onChange={(e) => setNewRequest({ ...newRequest, notes: e.target.value })}
+                onChange={(e) =>
+                  setNewRequest({ ...newRequest, notes: e.target.value })
+                }
                 className="col-span-3"
                 placeholder="Add any relevant notes..."
               />
             </div>
-             <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="duration" className="text-right">
-                    Duration (h)
-                </Label>
-                <Input
-                    id="duration"
-                    type="number"
-                    value={newRequest.duration || ''}
-                    onChange={(e) => setNewRequest({ ...newRequest, duration: parseInt(e.target.value) })}
-                    className="col-span-3"
-                />
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="duration" className="text-right">
+                Duration (h)
+              </Label>
+              <Input
+                id="duration"
+                type="number"
+                value={newRequest.duration || ''}
+                onChange={(e) =>
+                  setNewRequest({
+                    ...newRequest,
+                    duration: parseInt(e.target.value),
+                  })
+                }
+                className="col-span-3"
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
             <Button onClick={handleCreateRequest}>Create Request</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
     </div>
   );
 }
