@@ -70,10 +70,10 @@ export default function MaintenanceRequestDetailPage() {
 
   const handleMaintenanceForChange = (value: string) => {
     setMaintenanceFor(value);
-    if(value === 'work_center') {
-        if(request) {
-            setRequest({ ...request, equipmentId: '' });
-        }
+    if (value === 'equipment' && request) {
+       // Optionally reset work center when switching back to equipment
+    } else if (value === 'work_center' && request) {
+        setRequest({ ...request, equipmentId: '' });
     }
   };
 
@@ -361,7 +361,7 @@ export default function MaintenanceRequestDetailPage() {
                           value={request.status}
                           onValueChange={(v: MaintenanceRequestStatus) => handleSelectChange('status', v)}
                         >
-                          <SelectTrigger id="status">
+                          <SelectTrigger id="status" className="flex-1">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -369,8 +369,6 @@ export default function MaintenanceRequestDetailPage() {
                             <SelectItem value="In Progress">In Progress</SelectItem>
                             <SelectItem value="Repaired">Repaired</SelectItem>
                             <SelectItem value="Scrap">Scrap</SelectItem>
-                             <SelectItem value="Blocked">Blocked</SelectItem>
-                             <SelectItem value="Ready for next stage">Ready for next stage</SelectItem>
                           </SelectContent>
                         </Select>
                     </div>
