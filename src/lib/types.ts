@@ -58,6 +58,13 @@ export type MaintenanceRequest = {
   requesterId?: string;
 };
 
+export type WorkCenter = {
+  id: string;
+  name: string;
+  description: string;
+  department: string;
+};
+
 export type NavItem = {
   href: string;
   label: string;

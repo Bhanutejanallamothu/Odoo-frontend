@@ -1,4 +1,4 @@
-import { User, Team, Equipment, MaintenanceRequest } from './types';
+import { User, Team, Equipment, MaintenanceRequest, WorkCenter } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 
 export const users: User[] = [
@@ -38,4 +38,10 @@ export const maintenanceRequests: MaintenanceRequest[] = [
   { id: 'req-6', subject: 'Filter replacement (Annual)', equipmentId: 'equip-6', assignedTechnicianId: 'user-8', dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), status: 'New', requestType: 'Preventive', priority: 'Low', scheduledDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), teamId: 'team-2', requesterId: 'user-2' },
   { id: 'req-7', subject: 'Hydraulic fluid leak', equipmentId: 'equip-1', assignedTechnicianId: 'user-7', dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), status: 'In Progress', requestType: 'Corrective', priority: 'High', teamId: 'team-1', requesterId: 'user-9' },
   { id: 'req-8', subject: 'Completed software update', equipmentId: 'equip-4', assignedTechnicianId: 'user-10', dueDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), status: 'Repaired', requestType: 'Preventive', priority: 'Medium', teamId: 'team-3', duration: 2, notes: 'Firmware updated to v3.1.4', requesterId: 'user-2' },
+];
+
+export const workCenters: WorkCenter[] = [
+    { id: 'wc-1', name: 'Assembly Line 1', description: 'Main product assembly area', department: 'Manufacturing' },
+    { id: 'wc-2', name: 'Packaging Station A', description: 'Final product packaging and boxing', department: 'Logistics' },
+    { id: 'wc-3', name: 'Quality Control Lab', description: 'Product testing and quality assurance', department: 'Quality' },
 ];
