@@ -27,7 +27,6 @@ import ThemeToggle from '@/components/ui/cinematic-theme-switcher';
 
 const allNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiredRoles: ['admin', 'manager', 'technician'] },
-  { href: '/requests', label: 'Requests', icon: ClipboardList, requiredRoles: ['admin', 'manager', 'technician'] },
   { href: '/my-requests', label: 'My Requests', icon: ClipboardList, requiredRoles: ['employee'] },
   { href: '/equipment', label: 'Equipment', icon: Wrench, requiredRoles: ['admin', 'manager', 'technician'] },
   { href: '/teams', label: 'Teams', icon: Users, requiredRoles: ['admin', 'manager'] },
