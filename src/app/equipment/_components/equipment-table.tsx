@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Search,
   PlusCircle,
@@ -37,6 +38,7 @@ export default function EquipmentTable({
   equipment: allEquipment,
   users,
 }: EquipmentTableProps) {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = React.useState('');
 
   const getEmployeeName = (employeeId?: string) => {
@@ -48,6 +50,10 @@ export default function EquipmentTable({
       if (!technicianId) return 'N/A';
       return users.find(u => u.id === technicianId)?.name || 'N/A'
   }
+
+  const handleRowClick = (equipmentId: string) => {
+    router.push(`/equipment/${equipmentId}`);
+  };
 
   const filteredEquipment = React.useMemo(() => {
     return allEquipment.filter((item) =>
@@ -89,7 +95,11 @@ export default function EquipmentTable({
           <TableBody>
             {filteredEquipment.length > 0 ? (
               filteredEquipment.map((item) => (
-                <TableRow key={item.id}>
+                <TableRow 
+                    key={item.id} 
+                    onClick={() => handleRowClick(item.id)}
+                    className="cursor-pointer"
+                >
                   <TableCell className="font-medium">{item.name}</TableCell>
                   <TableCell>{getEmployeeName(item.assignedEmployeeId)}</TableCell>
                   <TableCell>{item.department}</TableCell>
@@ -101,7 +111,7 @@ export default function EquipmentTable({
                     <div className="flex items-center gap-2">
                        <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
+                            <Button variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
                               <span className="sr-only">Open menu</span>
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
@@ -109,8 +119,10 @@ export default function EquipmentTable({
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem><Pencil className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleRowClick(item.id); }}>
+                                <Pencil className="mr-2 h-4 w-4" />Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive" onClick={(e) => e.stopPropagation()}>
                                <Trash2 className="mr-2 h-4 w-4" /> Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>

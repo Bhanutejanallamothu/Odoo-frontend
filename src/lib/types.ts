@@ -28,6 +28,8 @@ export type Equipment = {
   status: EquipmentStatus;
   category: string;
   health: number; // Percentage from 0 to 100
+  assignedDate?: string; // ISO 8601
+  description?: string;
 };
 
 export type TeamType = 'Mechanics' | 'Electricians' | 'IT';
