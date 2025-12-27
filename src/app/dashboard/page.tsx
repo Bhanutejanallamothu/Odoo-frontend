@@ -9,6 +9,7 @@ import {
   Search,
   PlusCircle,
   ServerCrash,
+  Users,
 } from 'lucide-react';
 import {
   Card,
@@ -95,61 +96,44 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-destructive bg-destructive/20">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="border-red-500 bg-red-500/10">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-destructive">
+            <CardTitle className="text-sm font-medium text-red-700">
               Critical Equipment
             </CardTitle>
-            <ServerCrash className="h-4 w-4 text-destructive" />
+            <ServerCrash className="h-4 w-4 text-red-700" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-destructive">5 Units</div>
-            <p className="text-xs text-destructive/80">
+            <div className="text-2xl font-bold text-red-700">5 Units</div>
+            <p className="text-xs text-red-700/80">
               (Health &lt; 30%)
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-blue-500 bg-blue-500/10">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Open Requests</CardTitle>
-            <Construction className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{openRequests}</div>
-            <p className="text-xs text-muted-foreground">
-              New and in-progress tasks
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Overdue Tasks</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">
-              {overdueRequests}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Tasks past their due date
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              System Status
+            <CardTitle className="text-sm font-medium text-blue-700">
+              Technician Load
             </CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+            <Users className="h-4 w-4 text-blue-700" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold flex items-center gap-2">
-              <CheckCircle className="h-6 w-6 text-green-500" />
-              Operational
-            </div>
-            <p className="text-xs text-muted-foreground">
-              All systems are running smoothly
+            <div className="text-2xl font-bold text-blue-700">85% Utilized</div>
+            <p className="text-xs text-blue-700/80">
+              Assign Carefully
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="border-green-500 bg-green-500/10">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-green-700">Open Requests</CardTitle>
+            <Construction className="h-4 w-4 text-green-700" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-700">12 Pending</div>
+            <p className="text-xs text-green-700/80">
+              3 Overdue
             </p>
           </CardContent>
         </Card>
