@@ -15,10 +15,16 @@ import {
   parseISO,
   startOfToday,
 } from 'date-fns';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { MaintenanceRequest, Team } from '@/lib/types';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 
 function getTeamColor(teamId: string, teams: Team[]) {
     const teamIndex = teams.findIndex(t => t.id === teamId);
@@ -47,6 +53,13 @@ export function MaintenanceCalendar({ requests, teams }: { requests: Maintenance
     setCurrentMonth(format(firstDayNextMonth, 'MMM-yyyy'));
   }
 
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      setCurrentMonth(format(date, 'MMM-yyyy'));
+      setSelectedDay(date);
+    }
+  };
+
   let colStartClasses = [
     '',
     'col-start-2',
@@ -60,17 +73,32 @@ export function MaintenanceCalendar({ requests, teams }: { requests: Maintenance
   return (
     <div className="p-4 bg-card rounded-lg border">
       <div className="flex items-center justify-between">
-        <h2 className="flex-auto font-semibold text-foreground">
-          {format(firstDayCurrentMonth, 'MMMM yyyy')}
-        </h2>
-        <Button onClick={previousMonth} variant="ghost" size="icon">
-          <span className="sr-only">Previous month</span>
-          <ChevronLeft className="w-5 h-5" />
-        </Button>
-        <Button onClick={nextMonth} variant="ghost" size="icon">
-          <span className="sr-only">Next month</span>
-          <ChevronRight className="w-5 h-5" />
-        </Button>
+         <Popover>
+          <PopoverTrigger asChild>
+            <Button variant={"outline"} className="w-[280px] justify-start text-left font-normal">
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {format(firstDayCurrentMonth, 'MMMM yyyy')}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0">
+            <Calendar
+              mode="single"
+              selected={firstDayCurrentMonth}
+              onSelect={handleDateSelect}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+        <div className='flex items-center'>
+            <Button onClick={previousMonth} variant="ghost" size="icon">
+            <span className="sr-only">Previous month</span>
+            <ChevronLeft className="w-5 h-5" />
+            </Button>
+            <Button onClick={nextMonth} variant="ghost" size="icon">
+            <span className="sr-only">Next month</span>
+            <ChevronRight className="w-5 h-5" />
+            </Button>
+        </div>
       </div>
       <div className="grid grid-cols-7 mt-4 text-xs leading-6 text-center text-muted-foreground">
         <div>S</div>
