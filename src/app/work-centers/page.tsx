@@ -108,7 +108,7 @@ export default function WorkCentersPage() {
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight font-headline">
-          Work Centers
+          Work Center
         </h1>
         <Button onClick={handleAddNew}>
           <PlusCircle className="mr-2 h-4 w-4" /> New Work Center
@@ -116,9 +116,9 @@ export default function WorkCentersPage() {
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Work Center Management</CardTitle>
+          <CardTitle>Work Center</CardTitle>
           <CardDescription>
-            Search, filter, and manage all company work centers.
+            Manage your work centers here.
           </CardDescription>
         </CardHeader>
         <CardContent>
