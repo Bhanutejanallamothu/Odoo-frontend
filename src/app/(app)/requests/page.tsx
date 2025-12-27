@@ -45,6 +45,23 @@ import { useToast } from '@/hooks/use-toast';
 
 const statusColumns: MaintenanceRequestStatus[] = ['New', 'In Progress', 'Repaired', 'Scrap'];
 
+
+// This wrapper ensures DndContext only renders on the client.
+function ClientOnlyDndContext({ children, ...props }: React.ComponentProps<typeof DndContext> & {children: React.ReactNode}) {
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return null; // Or a loading spinner
+  }
+
+  return <DndContext {...props}>{children}</DndContext>;
+}
+
+
 export default function RequestsPage() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -93,14 +110,24 @@ export default function RequestsPage() {
       const oldIndex = requests.findIndex((r) => r.id === active.id);
       const newIndex = requests.findIndex((r) => r.id === over?.id);
       
-      const newStatus = over?.data.current?.status as MaintenanceRequestStatus;
+      const overContainer = over?.data.current?.sortable?.containerId;
+      const newStatus = statusColumns.find(s => s === overContainer) as MaintenanceRequestStatus;
       
-      setRequests((requests) => {
-        const movedRequest = { ...requests[oldIndex], status: newStatus };
-        let newRequests = arrayMove(requests, oldIndex, newIndex);
-        newRequests = newRequests.map(r => r.id === active.id ? movedRequest : r);
-        return newRequests;
-      });
+      if(newStatus) {
+        setRequests((requests) => {
+          let newRequests = [...requests];
+          const activeIndex = newRequests.findIndex(r => r.id === active.id);
+          
+          if(activeIndex !== -1) {
+            newRequests[activeIndex] = { ...newRequests[activeIndex], status: newStatus };
+          }
+          
+          // Re-sort or move if needed
+          newRequests = arrayMove(newRequests, oldIndex, newIndex);
+
+          return newRequests;
+        });
+      }
     }
   };
 
@@ -213,32 +240,32 @@ export default function RequestsPage() {
       </div>
       
       <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
-        <DndContext sensors={sensors} onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
-          <SortableContext items={filteredRequests.map(r => r.id)} strategy={verticalListSortingStrategy}>
-            {statusColumns.map((status) => (
-              <Card key={status} className="flex flex-col h-full">
-                <CardHeader>
-                  <CardTitle>{status}</CardTitle>
-                  <CardDescription>
-                    {filteredRequests.filter((r) => r.status === status).length} requests
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-4 flex-1 overflow-y-auto">
-                  {filteredRequests
-                    .filter((r) => r.status === status)
-                    .map((request) => (
-                      <RequestCard
-                        key={request.id}
-                        request={request}
-                        user={users.find(u => u.id === request.assignedTechnicianId)}
-                        equipment={equipment.find(e => e.id === request.equipmentId)}
-                      />
-                    ))}
-                </CardContent>
-              </Card>
-            ))}
-          </SortableContext>
-        </DndContext>
+        <ClientOnlyDndContext sensors={sensors} onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
+          {statusColumns.map((status) => (
+            <Card key={status} className="flex flex-col h-full">
+              <CardHeader>
+                <CardTitle>{status}</CardTitle>
+                <CardDescription>
+                  {filteredRequests.filter((r) => r.status === status).length} requests
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-4 flex-1 overflow-y-auto">
+                 <SortableContext items={filteredRequests.filter(r => r.status === status).map(r => r.id)} strategy={verticalListSortingStrategy}>
+                    {filteredRequests
+                      .filter((r) => r.status === status)
+                      .map((request) => (
+                        <RequestCard
+                          key={request.id}
+                          request={request}
+                          user={users.find(u => u.id === request.assignedTechnicianId)}
+                          equipment={equipment.find(e => e.id === request.equipmentId)}
+                        />
+                      ))}
+                 </SortableContext>
+              </CardContent>
+            </Card>
+          ))}
+        </ClientOnlyDndContext>
       </div>
 
        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
