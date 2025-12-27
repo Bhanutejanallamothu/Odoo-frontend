@@ -85,6 +85,14 @@ export default function MaintenanceRequestDetailPage() {
       setRequest({ ...request, [field]: value });
     }
   };
+  
+  const handleDateChange = (field: keyof MaintenanceRequest, value: string) => {
+    if (request) {
+        const date = value ? new Date(value).toISOString() : '';
+        setRequest({ ...request, [field]: date });
+    }
+  }
+
 
   const handleSelectChange = (
     field: keyof MaintenanceRequest,
@@ -127,6 +135,9 @@ export default function MaintenanceRequestDetailPage() {
   const selectedEquipment = equipment.find(e => e.id === request.equipmentId);
 
   const statuses: MaintenanceRequestStatus[] = ['New', 'In Progress', 'Repaired', 'Scrap'];
+
+  const requestDateValue = request.scheduledDate ? request.scheduledDate.split('T')[0] : '';
+
 
   return (
     <div className="flex flex-col gap-8">
@@ -269,12 +280,12 @@ export default function MaintenanceRequestDetailPage() {
               </div>
               
               <div className="grid gap-2">
-                  <Label htmlFor="due-date">Request Date</Label>
+                  <Label htmlFor="request-date">Request Date</Label>
                   <Input
-                      id="due-date"
+                      id="request-date"
                       type="date"
-                      value={request.dueDate.split('T')[0]}
-                      onChange={(e) => handleInputChange('dueDate', e.target.value)}
+                      value={requestDateValue}
+                      onChange={(e) => handleDateChange('scheduledDate', e.target.value)}
                   />
               </div>
 
@@ -346,7 +357,7 @@ export default function MaintenanceRequestDetailPage() {
                       id="due-date"
                       type="date"
                       value={request.dueDate.split('T')[0]}
-                      onChange={(e) => handleInputChange('dueDate', e.target.value)}
+                      onChange={(e) => handleDateChange('dueDate', e.target.value)}
                   />
               </div>
               <div className="grid grid-cols-2 gap-4">
