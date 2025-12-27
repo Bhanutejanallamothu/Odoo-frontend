@@ -46,6 +46,7 @@ export default function MaintenanceRequestDetailPage() {
   const { id } = params;
 
   const [request, setRequest] = React.useState<MaintenanceRequest | null>(null);
+  const [maintenanceFor, setMaintenanceFor] = React.useState('equipment');
 
   React.useEffect(() => {
     if (id) {
@@ -171,25 +172,55 @@ export default function MaintenanceRequestDetailPage() {
                   className="bg-muted/50"
                 />
               </div>
-
+              
               <div className="grid gap-2">
-                <Label htmlFor="equipment">Equipment</Label>
-                <Select
-                  value={request.equipmentId}
-                  onValueChange={handleEquipmentChange}
-                >
-                  <SelectTrigger id="equipment">
-                    <SelectValue placeholder="Select equipment..." />
+                <Label htmlFor="maintenance-for">Maintenance For</Label>
+                <Select value={maintenanceFor} onValueChange={setMaintenanceFor}>
+                  <SelectTrigger id="maintenance-for">
+                    <SelectValue placeholder="Select type..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {equipment.map((e) => (
-                      <SelectItem key={e.id} value={e.id}>
-                        {e.name}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="equipment">Equipment</SelectItem>
+                    <SelectItem value="work_center">Work Center</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
+              {maintenanceFor === 'equipment' && (
+                <div className="grid gap-2">
+                  <Label htmlFor="equipment">Equipment</Label>
+                  <Select
+                    value={request.equipmentId}
+                    onValueChange={handleEquipmentChange}
+                  >
+                    <SelectTrigger id="equipment">
+                      <SelectValue placeholder="Select equipment..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {equipment.map((e) => (
+                        <SelectItem key={e.id} value={e.id}>
+                          {e.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              
+              {maintenanceFor === 'work_center' && (
+                 <div className="grid gap-2">
+                  <Label htmlFor="work-center">Work Center</Label>
+                   <Select disabled>
+                      <SelectTrigger id="work-center">
+                        <SelectValue placeholder="Select work center..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {/* Future options for work centers */}
+                      </SelectContent>
+                   </Select>
+                 </div>
+              )}
+
 
               <div className="grid gap-2">
                 <Label htmlFor="category">Category</Label>
