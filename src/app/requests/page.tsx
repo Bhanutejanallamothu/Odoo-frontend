@@ -658,7 +658,7 @@ export default function RequestsPage() {
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleCreateRequest}>Create Request</Button>
+            <Button onClick={handleCreateRequest}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

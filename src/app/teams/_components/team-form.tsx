@@ -102,7 +102,7 @@ export default function TeamForm({ isOpen, onOpenChange, onSave, onDelete, team,
             ) : <div />}
             <div className="flex gap-2">
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-                <Button type="submit">Save</Button>
+                <Button type="submit">Save Changes</Button>
             </div>
           </DialogFooter>
         </form>

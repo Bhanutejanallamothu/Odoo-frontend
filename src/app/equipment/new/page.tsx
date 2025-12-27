@@ -159,7 +159,7 @@ export default function NewEquipmentPage() {
         <div className="flex items-center gap-2 ml-auto">
           <Button onClick={handleSave}>
             <Save className="mr-2 h-4 w-4" />
-            Create Equipment
+            Save Changes
           </Button>
         </div>
       </div>

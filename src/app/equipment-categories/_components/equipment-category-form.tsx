@@ -75,7 +75,7 @@ export default function EquipmentCategoryForm({ isOpen, onOpenChange, onSave, ca
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit">Save</Button>
+            <Button type="submit">Save Changes</Button>
           </DialogFooter>
         </form>
       </DialogContent>
