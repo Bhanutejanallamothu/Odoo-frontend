@@ -34,11 +34,12 @@ import {
   MaintenanceRequestStatus,
   MaintenanceRequestType,
 } from '@/lib/types';
-import { ArrowLeft, Save, FileText } from 'lucide-react';
+import { ArrowLeft, Save, FileText, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import WorkflowIndicator from '@/components/app/workflow-indicator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 export default function MaintenanceRequestDetailPage() {
   const router = useRouter();
@@ -54,7 +55,6 @@ export default function MaintenanceRequestDetailPage() {
       const foundRequest = maintenanceRequests.find((r) => r.id === id);
       if (foundRequest) {
         setRequest(foundRequest);
-        // Assuming requests are always for equipment for now, but this could be dynamic
         setMaintenanceFor(foundRequest.equipmentId ? 'equipment' : 'work_center');
       } else {
         toast({
@@ -103,8 +103,6 @@ export default function MaintenanceRequestDetailPage() {
   }
 
   const handleSave = () => {
-    // In a real app, you'd save this to your backend.
-    // For this mock, we just show a toast.
     toast({
       title: 'Request Saved',
       description: `Changes to "${request?.subject}" have been saved.`,
@@ -217,18 +215,39 @@ export default function MaintenanceRequestDetailPage() {
               {maintenanceFor === 'work_center' && (
                  <div className="grid gap-2">
                   <Label htmlFor="work-center">Work Center</Label>
-                   <Select>
-                      <SelectTrigger id="work-center">
-                        <SelectValue placeholder="Select work center..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {workCenters.map((wc) => (
-                          <SelectItem key={wc.id} value={wc.id}>
-                            {wc.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                   </Select>
+                    <div className='flex gap-2'>
+                        <Select>
+                            <SelectTrigger id="work-center">
+                                <SelectValue placeholder="Select work center..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {workCenters.map((wc) => (
+                                <SelectItem key={wc.id} value={wc.id}>
+                                    {wc.name}
+                                </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                         <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="icon">
+                                    <PlusCircle className="h-4 w-4" />
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                <AlertDialogTitle>Navigate to Work Centers?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    To create a new Work Center, you need to navigate to the Work Centers page.
+                                </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => router.push('/work-centers')}>Continue</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                   </div>
                  </div>
               )}
 
