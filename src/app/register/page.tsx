@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { signup } from '@/lib/api/auth';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function RegisterForm() {
     const router = useRouter();
@@ -24,9 +25,36 @@ export default function RegisterForm() {
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
     const [loading, setLoading] = React.useState(false);
+    const [showPassword, setShowPassword] = React.useState(false);
+
+    const validateForm = () => {
+      if (!email.endsWith('@gmail.com')) {
+        toast({
+          variant: 'destructive',
+          title: 'Invalid Email',
+          description: 'Please use a @gmail.com address to register.',
+        });
+        return false;
+      }
+  
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(password)) {
+        toast({
+          variant: 'destructive',
+          title: 'Weak Password',
+          description: 'Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.',
+        });
+        return false;
+      }
+      return true;
+    };
+
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
+      if (!validateForm()) {
+        return;
+      }
       setLoading(true);
       try {
         const response = await signup(fullName, email, password);
@@ -80,7 +108,27 @@ export default function RegisterForm() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} disabled={loading}/>
+              <div className="relative">
+                <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-muted-foreground" />
+                  )}
+                </button>
+              </div>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Creating Account...' : 'Create an account'}
