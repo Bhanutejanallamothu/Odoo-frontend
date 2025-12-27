@@ -1,7 +1,7 @@
 "use client";
 import * as React from 'react';
 import { useSearchParams } from 'next/navigation';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { PlusCircle, ListFilter } from 'lucide-react';
 
@@ -106,34 +106,37 @@ export default function RequestsPage() {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-
+  
     if (!over) return;
-
-    const activeId = active.id;
-    const overId = over.id;
-
-    const overContainer = over.data.current?.sortable?.containerId;
-    const newStatus = statusColumns.find(s => s === overContainer) as MaintenanceRequestStatus;
-
-    if (newStatus) {
-      setRequests((prevRequests) => {
-        const activeIndex = prevRequests.findIndex((r) => r.id === activeId);
-        if (activeIndex === -1) return prevRequests;
-
-        const updatedRequest = { ...prevRequests[activeIndex], status: newStatus };
-        const newRequests = [...prevRequests];
-        newRequests[activeIndex] = updatedRequest;
-        
-        // Find the index of the item we are over
-        const overIndex = prevRequests.findIndex((r) => r.id === overId);
-
-        // If we are dropping on an item, we reorder. Otherwise, we just update status.
-        if (overIndex !== -1 && active.id !== over.id) {
-           return arrayMove(newRequests, activeIndex, overIndex);
-        }
-
-        return newRequests;
+  
+    const activeId = String(active.id);
+    const overId = String(over.id);
+    const activeContainer = active.data.current?.sortable.containerId;
+    const overContainer = over.data.current?.sortable.containerId || over.id;
+  
+    if (activeContainer !== overContainer) {
+      setRequests((prev) => {
+        const activeIndex = prev.findIndex((r) => r.id === activeId);
+        if (activeIndex === -1) return prev;
+  
+        const newStatus = overContainer as MaintenanceRequestStatus;
+        const newRequests = [...prev];
+        newRequests[activeIndex] = {
+          ...newRequests[activeIndex],
+          status: newStatus,
+        };
+  
+        return arrayMove(newRequests, activeIndex, activeIndex);
       });
+    } else {
+        setRequests((prev) => {
+            const activeIndex = prev.findIndex((r) => r.id === activeId);
+            const overIndex = prev.findIndex((r) => r.id === overId);
+            if (activeIndex !== -1 && overIndex !== -1) {
+              return arrayMove(prev, activeIndex, overIndex);
+            }
+            return prev;
+          });
     }
   };
 

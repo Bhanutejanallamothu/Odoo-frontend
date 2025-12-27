@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   Wrench,
   Users,
-  ClipboardList,
   Calendar,
   FolderGit2,
   PanelLeft,
@@ -23,13 +22,17 @@ import {
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { NavItem, UserRole } from '@/lib/types';
+import ThemeToggle from '@/components/ui/cinematic-theme-switcher';
+import { Bell } from 'lucide-react';
 
 const allNavItems: NavItem[] = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiredRoles: ['admin', 'manager', 'technician'] },
-  { href: '/calendar', label: 'Manitenance Calendar', icon: Calendar, requiredRoles: ['admin', 'manager', 'technician'] },
-  { href: '/equipment', label: 'Equipment', icon: Wrench, requiredRoles: ['admin', 'manager', 'technician'] },
-  { href: '/dashboard', label: 'Reporting', icon: LineChart, requiredRoles: ['admin', 'manager'] },
-  { href: '/teams', label: 'Teams', icon: Users, requiredRoles: ['admin', 'manager'] },
+    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiredRoles: ['admin', 'manager', 'technician'] },
+    { href: '/my-requests', label: 'My Requests', icon: Wrench, requiredRoles: ['employee'] },
+    { href: '/requests', label: 'Requests', icon: Wrench, requiredRoles: ['admin', 'manager', 'technician'] },
+    { href: '/equipment', label: 'Equipment', icon: Wrench, requiredRoles: ['admin', 'manager', 'technician'] },
+    { href: '/calendar', label: 'Calendar', icon: Calendar, requiredRoles: ['admin', 'manager', 'technician'] },
+    { href: '/reporting', label: 'Reporting', icon: LineChart, requiredRoles: ['admin', 'manager'] },
+    { href: '/teams', label: 'Teams', icon: Users, requiredRoles: ['admin', 'manager'] },
 ];
 
 export default function Header() {
@@ -110,7 +113,12 @@ export default function Header() {
               </nav>
             </SheetContent>
           </Sheet>
-
+        
+        <ThemeToggle />
+        <Button variant="ghost" size="icon" className="rounded-full">
+            <Bell className="h-5 w-5" />
+            <span className="sr-only">Toggle notifications</span>
+        </Button>
         <Button asChild variant="outline" size="sm">
             <Link href="/login">
                 <LogOut className="mr-2 h-4 w-4" />
