@@ -30,7 +30,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { users } from '@/lib/mock-data';
 import { cn } from '@/lib/utils';
 import { NavItem } from '@/lib/types';
-import { ThemeToggle } from '@/components/theme-toggle';
+import ThemeToggle from '@/components/ui/cinematic-theme-switcher';
 
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -44,8 +44,13 @@ export default function Header() {
   const currentUser = users.find(u => u.email === 'technician@example.com') || users[0];
   const pathname = usePathname();
 
+  // Hide header on login and register pages
+  if (pathname === '/login' || pathname === '/register') {
+    return null;
+  }
+
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-white/10 bg-white/5 px-4 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 md:px-6">
       <div className="flex items-center gap-4">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
           <FolderGit2 className="h-6 w-6 text-primary" />
@@ -139,7 +144,7 @@ export default function Header() {
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <Link href="/">
+            <Link href="/login">
               <DropdownMenuItem>Log out</DropdownMenuItem>
             </Link>
           </DropdownMenuContent>
