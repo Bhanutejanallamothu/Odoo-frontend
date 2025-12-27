@@ -34,6 +34,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function WorkCentersPage() {
   const { toast } = useToast();
@@ -116,7 +117,7 @@ export default function WorkCentersPage() {
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Work Center</CardTitle>
+          <CardTitle>Work Center Management</CardTitle>
           <CardDescription>
             Manage your work centers here.
           </CardDescription>
@@ -174,7 +175,16 @@ function WorkCenterFormDialog({ isOpen, onOpenChange, onSave, workCenter }: Work
     if (workCenter) {
       setFormData(workCenter);
     } else {
-      setFormData({ name: '', description: '', department: '' });
+      setFormData({ 
+        name: '', 
+        description: '', 
+        department: '', 
+        tag: '', 
+        alternativeWorkCenterIds: [],
+        costPerHour: 0,
+        capacity: 0,
+        oeeTarget: 0
+      });
     }
   }, [workCenter, isOpen]);
 
@@ -183,14 +193,15 @@ function WorkCenterFormDialog({ isOpen, onOpenChange, onSave, workCenter }: Work
     onSave(formData);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData(prev => ({ ...prev, [id]: value }));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value, type } = e.target;
+    const isNumber = type === 'number';
+    setFormData(prev => ({ ...prev, [id]: isNumber ? parseFloat(value) : value }));
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{workCenter ? 'Edit Work Center' : 'Create Work Center'}</DialogTitle>
@@ -198,7 +209,7 @@ function WorkCenterFormDialog({ isOpen, onOpenChange, onSave, workCenter }: Work
               {workCenter ? 'Update the details of the work center.' : 'Fill in the details for the new work center.'}
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto px-1">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="name" className="text-right">
                 Name
@@ -215,7 +226,37 @@ function WorkCenterFormDialog({ isOpen, onOpenChange, onSave, workCenter }: Work
               <Label htmlFor="description" className="text-right">
                 Description
               </Label>
-              <Input id="description" value={formData.description} onChange={handleInputChange} className="col-span-3" required />
+              <Textarea id="description" value={formData.description} onChange={handleInputChange} className="col-span-3" required />
+            </div>
+             <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="tag" className="text-right">
+                Tag
+              </Label>
+              <Input id="tag" value={formData.tag || ''} onChange={handleInputChange} className="col-span-3" />
+            </div>
+             <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="alternativeWorkCenterIds" className="text-right">
+                Alternatives
+              </Label>
+              <Input id="alternativeWorkCenterIds" value={formData.alternativeWorkCenterIds?.join(',') || ''} onChange={(e) => setFormData(prev => ({...prev, alternativeWorkCenterIds: e.target.value.split(',')}))} className="col-span-3" placeholder="wc-2,wc-3" />
+            </div>
+             <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="costPerHour" className="text-right">
+                Cost/Hour
+              </Label>
+              <Input id="costPerHour" type="number" value={formData.costPerHour || ''} onChange={handleInputChange} className="col-span-3" />
+            </div>
+             <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="capacity" className="text-right">
+                Capacity (%)
+              </Label>
+              <Input id="capacity" type="number" value={formData.capacity || ''} onChange={handleInputChange} className="col-span-3" />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="oeeTarget" className="text-right">
+                OEE Target (%)
+              </Label>
+              <Input id="oeeTarget" type="number" value={formData.oeeTarget || ''} onChange={handleInputChange} className="col-span-3" />
             </div>
           </div>
           <DialogFooter>

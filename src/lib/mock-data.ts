@@ -41,7 +41,35 @@ export const maintenanceRequests: MaintenanceRequest[] = [
 ];
 
 export const workCenters: WorkCenter[] = [
-    { id: 'wc-1', name: 'Assembly Line 1', description: 'Main product assembly area', department: 'Manufacturing' },
-    { id: 'wc-2', name: 'Packaging Station A', description: 'Final product packaging and boxing', department: 'Logistics' },
-    { id: 'wc-3', name: 'Quality Control Lab', description: 'Product testing and quality assurance', department: 'Quality' },
+    { 
+        id: 'wc-1', 
+        name: 'Assembly1', 
+        description: 'Main product assembly area', 
+        department: 'Manufacturing',
+        tag: 'Primary',
+        alternativeWorkCenterIds: ['wc-2'],
+        costPerHour: 150,
+        capacity: 90,
+        oeeTarget: 85
+    },
+    { 
+        id: 'wc-2', 
+        name: 'Drill1', 
+        description: 'Precision drilling station', 
+        department: 'Manufacturing',
+        tag: 'Secondary',
+        alternativeWorkCenterIds: ['wc-1'],
+        costPerHour: 120,
+        capacity: 95,
+        oeeTarget: 90
+    },
+    { 
+        id: 'wc-3', 
+        name: 'Packaging Station A', 
+        description: 'Final product packaging and boxing', 
+        department: 'Logistics',
+        costPerHour: 80,
+        capacity: 100,
+        oeeTarget: 95
+    },
 ];

@@ -63,7 +63,13 @@ export type WorkCenter = {
   name: string;
   description: string;
   department: string;
+  tag?: string;
+  alternativeWorkCenterIds?: string[];
+  costPerHour?: number;
+  capacity?: number;
+  oeeTarget?: number;
 };
+
 
 export type NavItem = {
   href: string;

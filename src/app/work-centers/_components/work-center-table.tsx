@@ -16,18 +16,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { WorkCenter } from '@/lib/types';
+import { Badge } from '@/components/ui/badge';
 
 type WorkCenterTableProps = {
   workCenters: WorkCenter[];
@@ -52,8 +45,9 @@ export default function WorkCenterTable({
     return workCenters.filter(
       (item) =>
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.department.toLowerCase().includes(searchTerm.toLowerCase())
+        (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        item.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.tag && item.tag.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [workCenters, searchTerm]);
 
@@ -73,7 +67,6 @@ export default function WorkCenterTable({
             className="pl-10 max-w-sm"
           />
         </div>
-        {/* "New Work Center" button is now in the parent page */}
       </div>
       <div className="rounded-md border bg-card/50">
         <Table>
@@ -87,8 +80,12 @@ export default function WorkCenterTable({
                 />
               </TableHead>
               <TableHead>Work Center</TableHead>
-              <TableHead>Department</TableHead>
-              <TableHead>Description</TableHead>
+              <TableHead>Code</TableHead>
+              <TableHead>Tag</TableHead>
+              <TableHead>Alternative</TableHead>
+              <TableHead>Cost/Hour</TableHead>
+              <TableHead>Capacity</TableHead>
+              <TableHead>OEE Target</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -107,8 +104,12 @@ export default function WorkCenterTable({
                     />
                   </TableCell>
                   <TableCell className="font-medium">{item.name}</TableCell>
-                  <TableCell>{item.department}</TableCell>
-                  <TableCell>{item.description}</TableCell>
+                  <TableCell className="font-code">{item.id}</TableCell>
+                  <TableCell>{item.tag ? <Badge variant="outline">{item.tag}</Badge> : 'N/A'}</TableCell>
+                  <TableCell>{item.alternativeWorkCenterIds?.join(', ') || 'N/A'}</TableCell>
+                  <TableCell>${item.costPerHour?.toFixed(2) || '0.00'}</TableCell>
+                  <TableCell>{item.capacity ? `${item.capacity}%` : 'N/A'}</TableCell>
+                  <TableCell>{item.oeeTarget ? `${item.oeeTarget}%` : 'N/A'}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Button variant="outline" size="icon" onClick={() => onEdit(item)}>
@@ -123,7 +124,7 @@ export default function WorkCenterTable({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
+                <TableCell colSpan={9} className="h-24 text-center">
                   No results found.
                 </TableCell>
               </TableRow>
