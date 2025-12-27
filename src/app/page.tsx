@@ -52,7 +52,7 @@ export default function LoginForm() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4">
       <Card className="mx-auto max-w-sm w-full">
-        <CardHeader>
+        <CardHeader className="text-center">
           <CardTitle className="text-2xl font-headline">Login</CardTitle>
           <CardDescription>
             Enter your email below to login to your account
@@ -60,7 +60,7 @@ export default function LoginForm() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="grid gap-4">
-            <div className="grid gap-2">
+            <div className="grid gap-2 text-left">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -70,7 +70,7 @@ export default function LoginForm() {
                 defaultValue="technician@example.com"
               />
             </div>
-            <div className="grid gap-2">
+            <div className="grid gap-2 text-left">
               <div className="flex items-center">
                 <Label htmlFor="password">Password</Label>
                 <Link href="#" className="ml-auto inline-block text-sm underline">
