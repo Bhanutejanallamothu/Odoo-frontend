@@ -43,7 +43,7 @@ export default function AppSidebar() {
             <SidebarGroupLabel>Navigation</SidebarGroupLabel>
             <SidebarMenuItem>
               <Link href="/dashboard" className="w-full">
-                <SidebarMenuButton tooltip="Dashboard" isActive={true}>
+                <SidebarMenuButton tooltip="Dashboard">
                   <LayoutDashboard />
                   <span>Dashboard</span>
                 </SidebarMenuButton>
