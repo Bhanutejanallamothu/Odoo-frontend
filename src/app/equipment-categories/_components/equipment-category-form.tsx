@@ -45,7 +45,7 @@ export default function EquipmentCategoryForm({ isOpen, onOpenChange, onSave, ca
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-card/80 backdrop-blur-sm">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{category ? 'Edit Category' : 'Create Category'}</DialogTitle>

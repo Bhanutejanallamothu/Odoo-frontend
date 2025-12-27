@@ -245,7 +245,7 @@ export default function MaintenanceRequestDetailPage() {
         />
       </div>
 
-      <Card>
+      <Card className="bg-card/80 backdrop-blur-sm">
         <CardHeader>
           <CardTitle>Edit Maintenance Request</CardTitle>
           <CardDescription>
@@ -336,7 +336,7 @@ export default function MaintenanceRequestDetailPage() {
                           <PlusCircle className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent>
+                      <AlertDialogContent className="bg-card/80 backdrop-blur-sm">
                         <AlertDialogHeader>
                           <AlertDialogTitle>
                             Navigate to Work Centers?

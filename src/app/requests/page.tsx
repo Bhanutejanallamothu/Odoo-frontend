@@ -342,7 +342,7 @@ export default function RequestsPage() {
                 <ListFilter className="mr-2 h-4 w-4" /> Filter
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80">
+            <PopoverContent className="w-80 bg-card/80 backdrop-blur-sm">
               <div className="grid gap-4">
                 <div className="space-y-2">
                   <h4 className="font-medium leading-none">Filters</h4>
@@ -423,7 +423,7 @@ export default function RequestsPage() {
           collisionDetection={closestCenter}
         >
           {statusColumns.map((status) => (
-            <Card key={status} className="flex flex-col h-full bg-card/50">
+            <Card key={status} className="flex flex-col h-full bg-card/80 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle>{statusDisplayMap[status]}</CardTitle>
                 <CardDescription>
@@ -463,7 +463,7 @@ export default function RequestsPage() {
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] bg-card/80 backdrop-blur-sm">
           <DialogHeader>
             <DialogTitle>Create Maintenance Request</DialogTitle>
             <DialogDescription>

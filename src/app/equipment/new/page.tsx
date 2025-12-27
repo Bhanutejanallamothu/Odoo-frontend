@@ -131,7 +131,7 @@ export default function NewEquipmentPage() {
         </div>
       </div>
 
-      <Card>
+      <Card className="bg-card/80 backdrop-blur-sm">
         <CardHeader>
           <CardTitle>Create New Equipment</CardTitle>
           <CardDescription>

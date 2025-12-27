@@ -188,7 +188,7 @@ export default function EquipmentDetailPage() {
         </div>
       </div>
 
-      <Card>
+      <Card className="bg-card/80 backdrop-blur-sm">
         <CardHeader>
           <CardTitle>Edit Equipment</CardTitle>
           <CardDescription>
@@ -363,7 +363,7 @@ export default function EquipmentDetailPage() {
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-card/80 backdrop-blur-sm">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>

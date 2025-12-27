@@ -55,7 +55,7 @@ export default function CalendarPage() {
       <h1 className="text-3xl font-bold tracking-tight font-headline">
         Maintenance Calendar
       </h1>
-      <Card>
+      <Card className="bg-card/80 backdrop-blur-sm">
         <CardHeader>
           <CardTitle>Preventive Maintenance Schedule</CardTitle>
           <CardDescription>

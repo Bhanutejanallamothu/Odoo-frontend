@@ -155,7 +155,7 @@ export default function TeamsPage() {
           New
         </Button>
       </div>
-      <Card>
+      <Card className="bg-card/80 backdrop-blur-sm">
         <CardHeader>
           <CardTitle>Manage Teams</CardTitle>
           <CardDescription>
@@ -190,7 +190,7 @@ export default function TeamsPage() {
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-card/80 backdrop-blur-sm">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>

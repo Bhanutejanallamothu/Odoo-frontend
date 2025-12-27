@@ -39,7 +39,7 @@ export default function RequestCard({ request, user, equipment }: RequestCardPro
     <Card 
       ref={setNodeRef} 
       style={style} 
-      className="touch-none bg-card/50 hover:bg-card/80 transition-colors duration-200 cursor-pointer"
+      className="touch-none bg-card/50 hover:bg-card/90 transition-colors duration-200 cursor-pointer backdrop-blur-sm"
       onClick={handleClick}
     >
       <div {...attributes} {...listeners} className="p-4 cursor-grab active:cursor-grabbing">

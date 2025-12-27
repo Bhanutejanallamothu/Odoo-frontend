@@ -160,7 +160,7 @@ export default function WorkCentersPage() {
           <PlusCircle className="mr-2 h-4 w-4" /> New Work Center
         </Button>
       </div>
-      <Card>
+      <Card className="bg-card/80 backdrop-blur-sm">
         <CardHeader>
           <CardTitle>Work Center Management</CardTitle>
           <CardDescription>Manage your work centers here.</CardDescription>
@@ -195,7 +195,7 @@ export default function WorkCentersPage() {
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-card/80 backdrop-blur-sm">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -270,7 +270,7 @@ function WorkCenterFormDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-card/80 backdrop-blur-sm">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>

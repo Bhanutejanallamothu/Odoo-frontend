@@ -233,7 +233,7 @@ export default function MyRequestsPage() {
       </Card>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] bg-card/80 backdrop-blur-sm">
           <DialogHeader>
             <DialogTitle>Create Maintenance Request</DialogTitle>
             <DialogDescription>

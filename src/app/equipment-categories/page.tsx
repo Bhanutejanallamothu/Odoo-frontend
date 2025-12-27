@@ -140,7 +140,7 @@ export default function EquipmentCategoriesPage() {
           <PlusCircle className="mr-2 h-4 w-4" /> New
         </Button>
       </div>
-      <Card>
+      <Card className="bg-card/80 backdrop-blur-sm">
         <CardHeader>
           <CardTitle>Manage Categories</CardTitle>
           <CardDescription>
@@ -175,7 +175,7 @@ export default function EquipmentCategoriesPage() {
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-card/80 backdrop-blur-sm">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>

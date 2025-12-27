@@ -81,7 +81,7 @@ export default function RegisterForm() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4">
-      <Card className="mx-auto max-w-sm w-full">
+      <Card className="mx-auto max-w-sm w-full bg-card/80 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="text-xl font-headline">Sign Up</CardTitle>
           <CardDescription>

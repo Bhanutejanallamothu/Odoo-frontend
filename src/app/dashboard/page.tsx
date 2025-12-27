@@ -134,7 +134,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="border-destructive bg-destructive/10">
+        <Card className="border-destructive bg-destructive/10 backdrop-blur-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-destructive-foreground">
               Critical Equipment
@@ -148,7 +148,7 @@ export default function DashboardPage() {
             <p className="text-xs text-destructive/80">(Health &lt; 30%)</p>
           </CardContent>
         </Card>
-        <Card className="border-primary/50 bg-primary/10">
+        <Card className="border-primary/50 bg-primary/10 backdrop-blur-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-primary">
               Technician Load
@@ -162,7 +162,7 @@ export default function DashboardPage() {
             <p className="text-xs text-primary/80">Assign Carefully</p>
           </CardContent>
         </Card>
-        <Card className="border-green-500/50 bg-green-500/10">
+        <Card className="border-green-500/50 bg-green-500/10 backdrop-blur-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-green-600 dark:text-green-400">
               Open Requests
@@ -180,7 +180,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <Card className="bg-card shadow-soft rounded-lg">
+      <Card className="bg-card/80 backdrop-blur-sm shadow-soft rounded-lg">
         <CardContent className="p-0">
           <Table>
             <TableHeader>

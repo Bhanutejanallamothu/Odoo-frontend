@@ -71,7 +71,7 @@ export default function TeamForm({ isOpen, onOpenChange, onSave, onDelete, team 
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-card/80 backdrop-blur-sm">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{team ? 'Edit Team' : 'Create Team'}</DialogTitle>

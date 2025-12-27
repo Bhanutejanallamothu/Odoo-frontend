@@ -44,7 +44,7 @@ export default function EquipmentPage() {
       <h1 className="text-3xl font-bold tracking-tight font-headline">
         Equipment
       </h1>
-      <Card>
+      <Card className="bg-card/80 backdrop-blur-sm">
         <CardHeader>
           <CardTitle>Asset Management</CardTitle>
           <CardDescription>
