@@ -51,47 +51,49 @@ export default function RegisterForm() {
     };
 
   return (
-    <Card className="mx-auto max-w-sm w-full">
-      <CardHeader>
-        <CardTitle className="text-xl font-headline">Sign Up</CardTitle>
-        <CardDescription>
-          Enter your information to create an account
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="full-name">Full name</Label>
-            <Input id="full-name" placeholder="John Doe" required />
+    <main className="flex min-h-screen flex-col items-center justify-center p-4">
+      <Card className="mx-auto max-w-sm w-full">
+        <CardHeader>
+          <CardTitle className="text-xl font-headline">Sign Up</CardTitle>
+          <CardDescription>
+            Enter your information to create an account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="full-name">Full name</Label>
+              <Input id="full-name" placeholder="John Doe" required />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="m@example.com"
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="password">Password</Label>
+              <Input id="password" type="password" />
+            </div>
+            <Button type="submit" className="w-full">
+              Create an account
+            </Button>
+            <Button variant="outline" className="w-full">
+              <GoogleIcon className="mr-2 h-4 w-4" />
+              Sign up with Google
+            </Button>
+          </form>
+          <div className="mt-4 text-center text-sm">
+            Already have an account?{' '}
+            <Link href="/login" className="underline">
+              Sign in
+            </Link>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              required
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" />
-          </div>
-          <Button type="submit" className="w-full">
-            Create an account
-          </Button>
-          <Button variant="outline" className="w-full">
-            <GoogleIcon className="mr-2 h-4 w-4" />
-            Sign up with Google
-          </Button>
-        </form>
-        <div className="mt-4 text-center text-sm">
-          Already have an account?{' '}
-          <Link href="/login" className="underline">
-            Sign in
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </main>
   );
 }
