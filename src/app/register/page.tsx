@@ -20,6 +20,7 @@ export default function RegisterForm() {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       // In a real app, you'd handle Firebase registration here.
+      // This would create a 'General User' or 'employee' role.
       // For this mock, we'll just redirect to the dashboard.
       router.push('/dashboard');
     };
@@ -30,7 +31,7 @@ export default function RegisterForm() {
         <CardHeader>
           <CardTitle className="text-xl font-headline">Sign Up</CardTitle>
           <CardDescription>
-            Enter your information to create an account
+            Enter your information to create a General User account.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -58,7 +59,7 @@ export default function RegisterForm() {
           </form>
           <div className="mt-4 text-center text-sm">
             Already have an account?{' '}
-            <Link href="/" className="underline">
+            <Link href="/login" className="underline">
               Sign in
             </Link>
           </div>
