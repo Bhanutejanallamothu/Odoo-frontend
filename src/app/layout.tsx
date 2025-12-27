@@ -53,9 +53,9 @@ export default function RootLayout({
                 autoRampDuration={0.6}
             />
           </div>
-          <div className="flex min-h-screen flex-col">
+          <div className="relative flex min-h-screen flex-col">
             <Header />
-            <main className="p-4 sm:p-6 lg:p-8 flex-1">{children}</main>
+            <main className="p-4 sm:p-6 lg:p-8 flex-1 pt-24">{children}</main>
           </div>
           <Toaster />
         </ThemeProvider>

@@ -35,7 +35,7 @@ export default function Header() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-white/10 bg-white/5 px-4 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 md:px-6">
+    <header className="fixed top-4 left-1/2 -translate-x-1/2 z-30 flex h-16 items-center gap-4 border border-white/10 bg-white/5 px-4 md:px-6 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 rounded-lg w-[calc(100%-2rem)] max-w-7xl">
       <div className="flex items-center gap-4">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
           <FolderGit2 className="h-6 w-6 text-primary" />
