@@ -89,6 +89,13 @@ export default function TeamForm({ isOpen, onOpenChange, onSave, onDelete, team 
               <Input id="name" value={formData.name} onChange={handleInputChange} className="col-span-3" required />
             </div>
 
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="totalMembers" className="text-right">
+                Total Members
+              </Label>
+              <Input id="totalMembers" value={formData.members.filter(Boolean).length} className="col-span-3" readOnly disabled />
+            </div>
+
             <div className="grid grid-cols-4 items-start gap-4">
                <Label htmlFor="memberNames" className="text-right pt-2">
                 Members
@@ -102,7 +109,7 @@ export default function TeamForm({ isOpen, onOpenChange, onSave, onDelete, team 
                       onChange={(e) => handleMemberChange(index, e.target.value)}
                       placeholder="Member Name"
                     />
-                    <Button type="button" variant="ghost" size="icon" onClick={() => removeMemberInput(index)} disabled={formData.members.length === 1}>
+                    <Button type="button" variant="ghost" size="icon" onClick={() => removeMemberInput(index)} disabled={formData.members.length === 1 && team === null}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
