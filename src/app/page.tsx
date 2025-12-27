@@ -20,7 +20,7 @@ export default function LandingPage() {
             </Link>
           </Button>
           <Button asChild>
-            <Link href="/dashboard">
+            <Link href="/register">
               Get Started
             </Link>
           </Button>
