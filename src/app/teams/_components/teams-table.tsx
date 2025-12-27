@@ -32,6 +32,7 @@ export default function TeamsTable({ teams, users, onRowClick }: TeamsTableProps
         <TableHeader>
           <TableRow>
             <TableHead>Team Name</TableHead>
+            <TableHead>Total Members</TableHead>
             <TableHead>Team Members</TableHead>
             <TableHead>Company</TableHead>
           </TableRow>
@@ -40,6 +41,7 @@ export default function TeamsTable({ teams, users, onRowClick }: TeamsTableProps
           {teams.map((team) => (
             <TableRow key={team.id} onClick={() => onRowClick(team)} className="cursor-pointer">
               <TableCell className="font-medium">{team.name}</TableCell>
+              <TableCell>{team.memberIds.length}</TableCell>
               <TableCell>{getTeamMemberNames(team.memberIds)}</TableCell>
               <TableCell>My Company (San Francisco)</TableCell>
             </TableRow>

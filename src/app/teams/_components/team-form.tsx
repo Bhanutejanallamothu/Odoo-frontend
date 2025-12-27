@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Team, User } from '@/lib/types';
 import { Textarea } from '@/components/ui/textarea';
+import { Trash2 } from 'lucide-react';
 
 type TeamFormData = {
   name: string;
@@ -26,11 +27,12 @@ type TeamFormProps = {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onSave: (data: any) => void;
+  onDelete?: () => void;
   team: Team | null;
   users: User[];
 };
 
-export default function TeamForm({ isOpen, onOpenChange, onSave, team, users }: TeamFormProps) {
+export default function TeamForm({ isOpen, onOpenChange, onSave, onDelete, team, users }: TeamFormProps) {
   const [formData, setFormData] = React.useState<TeamFormData>({ name: '', memberNames: '', company: '' });
 
   React.useEffect(() => {
@@ -92,9 +94,16 @@ export default function TeamForm({ isOpen, onOpenChange, onSave, team, users }: 
               <Input id="company" value={formData.company} onChange={handleInputChange} className="col-span-3" required />
             </div>
           </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit">Save</Button>
+          <DialogFooter className="justify-between">
+            {team && onDelete ? (
+              <Button type="button" variant="destructive" onClick={onDelete} className="mr-auto">
+                <Trash2 className="mr-2 h-4 w-4" /> Delete
+              </Button>
+            ) : <div />}
+            <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+                <Button type="submit">Save</Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>

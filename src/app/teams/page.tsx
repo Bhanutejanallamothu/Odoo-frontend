@@ -70,8 +70,9 @@ export default function TeamsPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (team: Team) => {
-    setCurrentTeam(team);
+  const handleDelete = () => {
+    if (!currentTeam) return;
+    setIsModalOpen(false); // Close the edit modal first
     setIsDeleteDialogOpen(true);
   };
 
@@ -187,6 +188,7 @@ export default function TeamsPage() {
         isOpen={isModalOpen}
         onOpenChange={setIsModalOpen}
         onSave={handleSave}
+        onDelete={handleDelete}
         team={currentTeam}
         users={users}
       />
