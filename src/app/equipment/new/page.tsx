@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -83,21 +84,22 @@ export default function NewEquipmentPage() {
   };
 
   const handleSave = async () => {
-    if (!equipment.name || !equipment.category || !equipment.maintenanceTeamId) {
+    if (!equipment.category || !equipment.maintenanceTeamId || !equipment.assignedDate) {
         toast({
             variant: 'destructive',
             title: 'Missing Fields',
-            description: 'Please fill out Name, Category, and Maintenance Team.'
+            description: 'Please fill out Category, Maintenance Team, and Assigned Date.'
         })
         return;
     }
 
     const equipmentToSave: Omit<Equipment, 'id'> = {
         ...equipment,
-        name: equipment.name,
+        name: equipment.name || 'Unnamed Equipment',
         serialNumber: equipment.serialNumber || `SN-${Date.now()}`,
         department: equipment.department || 'General',
         maintenanceTeamId: equipment.maintenanceTeamId,
+        assignedDate: equipment.assignedDate,
         purchaseDate: equipment.purchaseDate || new Date().toISOString(),
         warrantyExpiry: equipment.warrantyExpiry || new Date().toISOString(),
         location: equipment.location || 'Unassigned',
@@ -132,9 +134,6 @@ export default function NewEquipmentPage() {
                     <Skeleton className="h-10 w-10" />
                     <Skeleton className="h-7 w-64" />
                 </div>
-                <div className="flex items-center gap-2 ml-auto">
-                    <Skeleton className="h-10 w-24" />
-                </div>
             </div>
             <Skeleton className="h-96 w-full" />
         </div>
@@ -142,7 +141,7 @@ export default function NewEquipmentPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 pb-24">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={() => router.back()}>
@@ -155,12 +154,6 @@ export default function NewEquipmentPage() {
             <span className="text-primary mx-2">&gt;</span>
             <span className="text-primary">New Equipment</span>
           </h1>
-        </div>
-        <div className="flex items-center gap-2 ml-auto">
-          <Button onClick={handleSave}>
-            <Save className="mr-2 h-4 w-4" />
-            Save Changes
-          </Button>
         </div>
       </div>
 
@@ -176,7 +169,7 @@ export default function NewEquipmentPage() {
             {/* Left Section */}
             <div className="space-y-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Name *</Label>
+                <Label htmlFor="name">Name</Label>
                 <Input
                   id="name"
                   value={equipment.name}
@@ -253,7 +246,7 @@ export default function NewEquipmentPage() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="assigned-date">Assigned Date</Label>
+                <Label htmlFor="assigned-date">Assigned Date *</Label>
                 <Input
                   id="assigned-date"
                   type="date"
@@ -371,6 +364,17 @@ export default function NewEquipmentPage() {
           </div>
         </CardContent>
       </Card>
+      
+      <div className="fixed bottom-0 left-0 right-0 z-10 border-t bg-background/95 p-4 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-7xl justify-end">
+            <Button onClick={handleSave}>
+                <Save className="mr-2 h-4 w-4" />
+                Save Changes
+            </Button>
+        </div>
+      </div>
     </div>
   );
 }
+
+    
