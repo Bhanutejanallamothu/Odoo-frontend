@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import * as React from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -13,16 +14,41 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { signup } from '@/lib/api/auth';
 
 export default function RegisterForm() {
     const router = useRouter();
+    const { toast } = useToast();
+    const [fullName, setFullName] = React.useState('');
+    const [email, setEmail] = React.useState('');
+    const [password, setPassword] = React.useState('');
+    const [loading, setLoading] = React.useState(false);
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      // In a real app, you'd handle Firebase registration here.
-      // This would create a 'General User' or 'employee' role.
-      // For this mock, we'll just redirect to the dashboard.
-      router.push('/dashboard');
+      setLoading(true);
+      try {
+        const response = await signup(fullName, email, password);
+        if(response.success){
+            toast({
+                title: 'Signup Successful',
+                description: 'You can now log in with your credentials.',
+            });
+            router.push('/login');
+        } else {
+            throw new Error('Signup failed. Please try again.');
+        }
+
+      } catch (error: any) {
+        toast({
+            variant: 'destructive',
+            title: 'Signup Failed',
+            description: error.message || 'An error occurred during signup.',
+        });
+      } finally {
+        setLoading(false);
+      }
     };
 
   return (
@@ -31,14 +57,14 @@ export default function RegisterForm() {
         <CardHeader>
           <CardTitle className="text-xl font-headline">Sign Up</CardTitle>
           <CardDescription>
-            Enter your information to create a General User account.
+            Enter your information to create an account.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="full-name">Full name</Label>
-              <Input id="full-name" placeholder="John Doe" required />
+              <Input id="full-name" placeholder="John Doe" required value={fullName} onChange={e => setFullName(e.target.value)} disabled={loading}/>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
@@ -47,14 +73,17 @@ export default function RegisterForm() {
                 type="email"
                 placeholder="m@example.com"
                 required
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                disabled={loading}
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" />
+              <Input id="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} disabled={loading}/>
             </div>
-            <Button type="submit" className="w-full">
-              Create an account
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Creating Account...' : 'Create an account'}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">

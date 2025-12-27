@@ -23,6 +23,7 @@ export default function EquipmentPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
+        // The backend GET /api/equipment is expected to nest category and other details
         const [equipmentData, usersData] = await Promise.all([
           getAllEquipment(),
           getUsers(),

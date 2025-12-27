@@ -1,5 +1,4 @@
-
-"use client";
+'use client';
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
@@ -32,17 +31,17 @@ export default function EquipmentTable({
   const router = useRouter();
   const [searchTerm, setSearchTerm] = React.useState('');
 
-  const getEmployeeName = (employeeId?: string) => {
+  const getEmployeeName = (employeeId?: number) => {
     if (!employeeId) return 'N/A';
     return users.find((u) => u.id === employeeId)?.name || 'N/A';
   };
   
-  const getTechnicianName = (technicianId?: string) => {
+  const getTechnicianName = (technicianId?: number) => {
       if (!technicianId) return 'N/A';
-      return users.find(u => u.id === technicianId)?.name || 'N/A'
+      return users.find(u => u.id === technicianId)?.name || 'N'
   }
 
-  const handleRowClick = (equipmentId: string) => {
+  const handleRowClick = (equipmentId: number) => {
     router.push(`/equipment/${equipmentId}`);
   };
 
@@ -99,7 +98,7 @@ export default function EquipmentTable({
                   <TableCell>{getTechnicianName(item.assignedTechnicianId)}</TableCell>
                   <TableCell>
                     <Link href="/equipment-categories" className="hover:underline text-primary" onClick={(e) => e.stopPropagation()}>
-                        {item.category}
+                        {item.category?.name || 'N/A'}
                     </Link>
                   </TableCell>
                   <TableCell>My Company (San Francisco)</TableCell>

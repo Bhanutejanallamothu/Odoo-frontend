@@ -1,4 +1,3 @@
-
 'use client';
 import * as React from 'react';
 import {
@@ -10,7 +9,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
-import { Team, User } from '@/lib/types';
+import { Team } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import TeamsTable from './_components/teams-table';
 import TeamForm from './_components/team-form';
@@ -26,40 +25,34 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getTeams, createTeam, updateTeam, deleteTeam } from '@/lib/api/teams';
-import { getUsers } from '@/lib/api/users';
 
 export default function TeamsPage() {
   const { toast } = useToast();
   const [teams, setTeams] = React.useState<Team[]>([]);
-  const [users, setUsers] = React.useState<User[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
   const [currentTeam, setCurrentTeam] = React.useState<Team | null>(null);
 
-  React.useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [teamsData, usersData] = await Promise.all([
-          getTeams(),
-          getUsers(),
-        ]);
+  const fetchTeams = React.useCallback(async () => {
+    try {
+        const teamsData = await getTeams();
         setTeams(teamsData);
-        setUsers(usersData);
-      } catch (error) {
+    } catch (error) {
         console.error('Failed to fetch data:', error);
         toast({
           variant: 'destructive',
           title: 'Error',
           description: 'Failed to load teams data.',
         });
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    }
   }, [toast]);
+
+
+  React.useEffect(() => {
+    setLoading(true);
+    fetchTeams().finally(() => setLoading(false));
+  }, [fetchTeams]);
 
   const handleAddNew = () => {
     setCurrentTeam(null);
@@ -81,17 +74,17 @@ export default function TeamsPage() {
     if (!currentTeam) return;
     try {
       await deleteTeam(currentTeam.id);
-      setTeams(teams.filter((t) => t.id !== currentTeam.id));
+      await fetchTeams(); // Refetch
       toast({
         title: 'Team Deleted',
         description: `"${currentTeam.name}" has been successfully deleted.`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Delete error:', error);
       toast({
         variant: 'destructive',
         title: 'Delete failed',
-        description: `Could not delete team "${currentTeam.name}".`,
+        description: error.message || `Could not delete team "${currentTeam.name}".`,
       });
     } finally {
       setIsDeleteDialogOpen(false);
@@ -100,7 +93,7 @@ export default function TeamsPage() {
   };
 
   const handleSave = async (
-    formData: Omit<Team, 'id' | 'totalMembers'> & { members: string[] }
+    formData: { name: string, members: string[], company: string }
   ) => {
     
     if (!formData.name) {
@@ -112,39 +105,38 @@ export default function TeamsPage() {
         return;
     }
 
-    const validMembers = formData.members.map(m => m.trim()).filter(Boolean);
+    // Assuming member IDs are numbers. The form gives us strings.
+    const memberIds = formData.members.map(m => parseInt(m.trim())).filter(id => !isNaN(id));
 
     const teamData = {
       name: formData.name,
-      members: validMembers,
-      totalMembers: validMembers.length,
-      company: formData.company,
+      members: memberIds,
+      companyId: 1, // Mock company ID
     };
 
     const isEditing = !!currentTeam;
 
     try {
       if (isEditing) {
-        const savedTeam = await updateTeam(currentTeam.id, teamData);
-        setTeams(teams.map((t) => (t.id === currentTeam.id ? savedTeam : t)));
+        await updateTeam(currentTeam.id, teamData);
         toast({
           title: 'Team Updated',
           description: `"${formData.name}" has been successfully updated.`,
         });
       } else {
-        const savedTeam = await createTeam(teamData);
-        setTeams([savedTeam, ...teams]);
+        await createTeam(teamData);
         toast({
           title: 'Team Created',
           description: `"${formData.name}" has been successfully created.`,
         });
       }
-    } catch (error) {
+      await fetchTeams();
+    } catch (error: any) {
       console.error('Save error:', error);
       toast({
         variant: 'destructive',
         title: 'Save failed',
-        description: `Could not save team "${formData.name}".`,
+        description: error.message || `Could not save team "${formData.name}".`,
       });
     } finally {
       setIsModalOpen(false);

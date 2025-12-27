@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -18,14 +17,14 @@ import { Trash2, PlusCircle } from 'lucide-react';
 
 type TeamFormData = {
   name: string;
-  members: string[];
+  members: string[]; // member IDs will be stored as strings in the form state
   company: string;
 };
 
 type TeamFormProps = {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onSave: (data: any) => void;
+  onSave: (data: TeamFormData) => void;
   onDelete?: () => void;
   team: Team | null;
 };
@@ -37,8 +36,8 @@ export default function TeamForm({ isOpen, onOpenChange, onSave, onDelete, team 
     if (team) {
       setFormData({
         name: team.name,
-        members: team.members.length > 0 ? team.members : [''],
-        company: team.company || 'My Company (San Francisco)',
+        members: team.members.length > 0 ? team.members.map(String) : [''],
+        company: 'My Company (San Francisco)', // company name is not on team object
       });
     } else {
       setFormData({ name: '', members: [''], company: 'My Company (San Francisco)' });
@@ -67,9 +66,8 @@ export default function TeamForm({ isOpen, onOpenChange, onSave, onDelete, team 
 
   const removeMemberInput = (index: number) => {
     const newMembers = formData.members.filter((_, i) => i !== index);
-    setFormData(prev => ({ ...prev, members: newMembers }));
+    setFormData(prev => ({ ...prev, members: newMembers.length > 0 ? newMembers : [''] }));
   };
-
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -97,8 +95,8 @@ export default function TeamForm({ isOpen, onOpenChange, onSave, onDelete, team 
             </div>
 
             <div className="grid grid-cols-4 items-start gap-4">
-               <Label htmlFor="memberNames" className="text-right pt-2">
-                Members
+               <Label htmlFor="memberIds" className="text-right pt-2">
+                Member IDs
               </Label>
               <div className="col-span-3 space-y-2">
                 {formData.members.map((member, index) => (
@@ -107,7 +105,7 @@ export default function TeamForm({ isOpen, onOpenChange, onSave, onDelete, team 
                       type="text"
                       value={member}
                       onChange={(e) => handleMemberChange(index, e.target.value)}
-                      placeholder="Member Name"
+                      placeholder="User ID"
                     />
                     <Button type="button" variant="ghost" size="icon" onClick={() => removeMemberInput(index)} disabled={formData.members.length === 1 && team === null}>
                       <Trash2 className="h-4 w-4 text-destructive" />
@@ -124,7 +122,7 @@ export default function TeamForm({ isOpen, onOpenChange, onSave, onDelete, team 
               <Label htmlFor="company" className="text-right">
                 Company
               </Label>
-              <Input id="company" value={formData.company} onChange={handleInputChange} className="col-span-3" required />
+              <Input id="company" value={formData.company} className="col-span-3" readOnly disabled />
             </div>
           </div>
           <DialogFooter className="justify-between">

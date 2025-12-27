@@ -1,45 +1,26 @@
-
 import { EquipmentCategory } from '@/lib/types';
-
-const API_URL = '/api/equipment-categories';
+import request from '@/lib/api-client';
 
 export async function getEquipmentCategories(): Promise<EquipmentCategory[]> {
-  const response = await fetch(API_URL);
-  if (!response.ok) {
-    throw new Error('Failed to fetch equipment categories');
-  }
-  return response.json();
+  return request('/categories');
 }
 
-export async function createEquipmentCategory(category: Omit<EquipmentCategory, 'id'>): Promise<EquipmentCategory> {
-    const response = await fetch(API_URL, {
+export async function createEquipmentCategory(category: { name: string, responsible: string, companyId: number }): Promise<EquipmentCategory> {
+    return request('/categories', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(category),
     });
-    if (!response.ok) {
-        throw new Error('Failed to create equipment category');
-    }
-    return response.json();
 }
 
-export async function updateEquipmentCategory(id: string, category: Partial<Omit<EquipmentCategory, 'id'>>): Promise<EquipmentCategory> {
-    const response = await fetch(`${API_URL}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+export async function updateEquipmentCategory(id: number, category: Partial<{ name: string, responsible: string, companyId: number }>): Promise<EquipmentCategory> {
+    return request(`/categories/${id}`, {
+        method: 'PUT', // Assuming PUT for updates
         body: JSON.stringify(category),
     });
-    if (!response.ok) {
-        throw new Error('Failed to update equipment category');
-    }
-    return response.json();
 }
 
-export async function deleteEquipmentCategory(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/${id}`, {
+export async function deleteEquipmentCategory(id: number): Promise<void> {
+    return request(`/categories/${id}`, {
         method: 'DELETE',
     });
-    if (!response.ok) {
-        throw new Error('Failed to delete equipment category');
-    }
 }

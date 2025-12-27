@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -22,58 +21,49 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Equipment, User, Team, WorkCenter } from '@/lib/types';
+import { Equipment, User, Team, WorkCenter, EquipmentCategory } from '@/lib/types';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 import { createEquipment } from '@/lib/api/equipment';
-import { getUsers } from '@/lib/api/users';
-import { getTeams } from '@/lib/api/teams';
-import { getWorkCenters } from '@/lib/api/work-centers';
 import { Skeleton } from '@/components/ui/skeleton';
+import request from '@/lib/api-client';
 
-type NewEquipment = Omit<Equipment, 'id' | 'health' | 'status' | 'isScrapped'>;
+type NewEquipment = Partial<Omit<Equipment, 'id'>>;
+
+type MetaData = {
+    categories: EquipmentCategory[];
+    teams: Team[];
+    technicians: User[];
+    employees: User[];
+    workCenters: WorkCenter[];
+}
 
 export default function NewEquipmentPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const [equipment, setEquipment] = React.useState<Partial<NewEquipment>>({
-      name: '',
-      serialNumber: '',
-      department: 'R&D',
-      location: 'Main Building'
-  });
-  const [users, setUsers] = React.useState<User[]>([]);
-  const [teams, setTeams] = React.useState<Team[]>([]);
-  const [workCenters, setWorkCenters] = React.useState<WorkCenter[]>([]);
+  const [equipment, setEquipment] = React.useState<NewEquipment>({});
+  const [meta, setMeta] = React.useState<MetaData | null>(null);
   const [loading, setLoading] = React.useState(true);
 
-  const [usedBy, setUsedBy] = React.useState('employee');
-
   React.useEffect(() => {
-    const fetchData = async () => {
+    const fetchMetaData = async () => {
       setLoading(true);
       try {
-        const [usersData, teamsData, wcData] = await Promise.all([
-          getUsers(),
-          getTeams(),
-          getWorkCenters(),
-        ]);
-        setUsers(usersData);
-        setTeams(teamsData);
-        setWorkCenters(wcData);
+        const metaData = await request('/meta/create-equipment');
+        setMeta(metaData);
       } catch (error) {
-        console.error('Failed to fetch data for new equipment form', error);
+        console.error('Failed to fetch meta data for new equipment form', error);
         toast({
           variant: 'destructive',
           title: 'Error',
-          description: 'Failed to load necessary data.',
+          description: 'Failed to load necessary data for the form.',
         });
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
+    fetchMetaData();
   }, [toast]);
 
   const handleInputChange = (
@@ -84,49 +74,33 @@ export default function NewEquipmentPage() {
   };
 
   const handleSave = async () => {
-    if (!equipment.category || !equipment.maintenanceTeamId || !equipment.assignedDate) {
+    if (!equipment.categoryId || !equipment.maintenanceTeamId || !equipment.name) {
         toast({
             variant: 'destructive',
             title: 'Missing Fields',
-            description: 'Please fill out Category, Maintenance Team, and Assigned Date.'
+            description: 'Please fill out Name, Equipment Category, and Maintenance Team.'
         })
         return;
     }
 
-    const equipmentToSave: Omit<Equipment, 'id'> = {
-        ...equipment,
-        name: equipment.name || 'Unnamed Equipment',
-        serialNumber: equipment.serialNumber || `SN-${Date.now()}`,
-        department: equipment.department || 'General',
-        maintenanceTeamId: equipment.maintenanceTeamId,
-        assignedDate: equipment.assignedDate,
-        purchaseDate: equipment.purchaseDate || new Date().toISOString(),
-        warrantyExpiry: equipment.warrantyExpiry || new Date().toISOString(),
-        location: equipment.location || 'Unassigned',
-        isScrapped: false,
-        status: 'Operational',
-        category: equipment.category,
-        health: 100,
-    }
-    
     try {
-        await createEquipment(equipmentToSave);
+        await createEquipment(equipment);
         toast({
           title: 'Equipment Created',
           description: `"${equipment.name}" has been successfully created.`,
         });
         router.push('/equipment');
-    } catch (error) {
+    } catch (error: any) {
         console.error(error);
         toast({
             variant: 'destructive',
             title: 'Save Failed',
-            description: 'Could not create the new equipment.'
+            description: error.message || 'Could not create the new equipment.'
         })
     }
   };
 
-  if (loading) {
+  if (loading || !meta) {
     return (
         <div className="flex flex-col gap-8">
             <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -169,75 +143,55 @@ export default function NewEquipmentPage() {
             {/* Left Section */}
             <div className="space-y-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">Name *</Label>
                 <Input
                   id="name"
-                  value={equipment.name}
+                  value={equipment.name || ''}
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   placeholder="e.g. Dell XPS 15"
                 />
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="category">Equipment Category *</Label>
+                <Label htmlFor="categoryId">Equipment Category *</Label>
                 <Select
-                  value={equipment.category}
-                  onValueChange={(v) => handleInputChange('category', v)}
+                  value={equipment.categoryId?.toString()}
+                  onValueChange={(v) => handleInputChange('categoryId', Number(v))}
                 >
-                  <SelectTrigger id="category">
+                  <SelectTrigger id="categoryId">
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {/* This should ideally fetch from an API too */}
-                    <SelectItem value="Monitors">Monitors</SelectItem>
-                    <SelectItem value="Computers">Computers</SelectItem>
-                    <SelectItem value="Machinery">Machinery</SelectItem>
-                    <SelectItem value="Robotics">Robotics</SelectItem>
-                    <SelectItem value="Vehicle">Vehicle</SelectItem>
-                    <SelectItem value="Facilities">Facilities</SelectItem>
-                    <SelectItem value="IT Hardware">IT Hardware</SelectItem>
+                    {meta.categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="company">Company</Label>
+                <Label htmlFor="serialNumber">Serial Number</Label>
                 <Input
-                  id="company"
-                  value="My Company (San Francisco)"
-                  readOnly
-                  className="bg-muted/50"
+                  id="serialNumber"
+                  value={equipment.serialNumber || ''}
+                  onChange={(e) => handleInputChange('serialNumber', e.target.value)}
                 />
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="used-by">Used By</Label>
-                <Select value={usedBy} onValueChange={setUsedBy}>
-                  <SelectTrigger id="used-by">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="employee">Employee</SelectItem>
-                    <SelectItem value="department">Department</SelectItem>
-                    <SelectItem value="location">Location</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="maintenance-team">Maintenance Team *</Label>
+                <Label htmlFor="maintenanceTeamId">Maintenance Team *</Label>
                 <Select
-                  value={equipment.maintenanceTeamId}
+                  value={equipment.maintenanceTeamId?.toString()}
                   onValueChange={(v) =>
-                    handleInputChange('maintenanceTeamId', v)
+                    handleInputChange('maintenanceTeamId', Number(v))
                   }
                 >
-                  <SelectTrigger id="maintenance-team">
+                  <SelectTrigger id="maintenanceTeamId">
                     <SelectValue placeholder="Select a team" />
                   </SelectTrigger>
                   <SelectContent>
-                    {teams.map((team) => (
-                      <SelectItem key={team.id} value={team.id}>
+                    {meta.teams.map((team) => (
+                      <SelectItem key={team.id} value={team.id.toString()}>
                         {team.name}
                       </SelectItem>
                     ))}
@@ -245,53 +199,40 @@ export default function NewEquipmentPage() {
                 </Select>
               </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="assigned-date">Assigned Date *</Label>
-                <Input
-                  id="assigned-date"
-                  type="date"
-                  value={(equipment.assignedDate || '').split('T')[0]}
-                  onChange={(e) =>
-                    handleInputChange('assignedDate', e.target.value)
-                  }
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Enter a description"
-                  className="min-h-[100px]"
-                  value={equipment.description || ''}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                />
-              </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                    id="description"
+                    placeholder="Enter a description"
+                    className="min-h-[100px]"
+                    value={equipment.description || ''}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    />
+                </div>
             </div>
 
             {/* Right Section */}
             <div className="space-y-4">
               <div className="grid gap-2">
-                <Label htmlFor="technician">Technician</Label>
+                <Label htmlFor="assignedTechnicianId">Technician</Label>
                 <Select
-                  value={equipment.assignedTechnicianId}
+                  value={equipment.assignedTechnicianId?.toString()}
                   onValueChange={(v) =>
-                    handleInputChange('assignedTechnicianId', v)
+                    handleInputChange('assignedTechnicianId', Number(v))
                   }
                    disabled={!equipment.maintenanceTeamId}
                 >
-                  <SelectTrigger id="technician">
+                  <SelectTrigger id="assignedTechnicianId">
                     <SelectValue placeholder="Select a technician" />
                   </SelectTrigger>
                   <SelectContent>
-                    {users
+                    {meta.technicians
                       .filter(
                         (u) =>
-                          u.role === 'technician' &&
                           u.teamId === equipment.maintenanceTeamId
                       )
                       .map((tech) => (
-                        <SelectItem key={tech.id} value={tech.id}>
+                        <SelectItem key={tech.id} value={tech.id.toString()}>
                           {tech.name}
                         </SelectItem>
                       ))}
@@ -299,61 +240,39 @@ export default function NewEquipmentPage() {
                 </Select>
               </div>
 
-              {usedBy === 'employee' && (
-                <div className="grid gap-2">
-                  <Label htmlFor="employee">Employee</Label>
+              <div className="grid gap-2">
+                  <Label htmlFor="assignedEmployeeId">Employee</Label>
                   <Select
-                    value={equipment.assignedEmployeeId}
+                    value={equipment.assignedEmployeeId?.toString()}
                     onValueChange={(v) =>
-                      handleInputChange('assignedEmployeeId', v)
+                      handleInputChange('assignedEmployeeId', Number(v))
                     }
                   >
-                    <SelectTrigger id="employee">
+                    <SelectTrigger id="assignedEmployeeId">
                       <SelectValue placeholder="Select an employee" />
                     </SelectTrigger>
                     <SelectContent>
-                      {users
-                        .filter((u) => u.role === 'employee')
-                        .map((emp) => (
-                          <SelectItem key={emp.id} value={emp.id}>
+                      {meta.employees.map((emp) => (
+                          <SelectItem key={emp.id} value={emp.id.toString()}>
                             {emp.name}
                           </SelectItem>
                         ))}
                     </SelectContent>
                   </Select>
                 </div>
-              )}
               
-               <div className="grid gap-2">
-                <Label htmlFor="serial-number">Serial Number</Label>
-                <Input
-                  id="serial-number"
-                  value={equipment.serialNumber}
-                  onChange={(e) => handleInputChange('serialNumber', e.target.value)}
-                />
-              </div>
-
-
               <div className="grid gap-2">
-                <Label htmlFor="used-in-location">Used in Location</Label>
-                <Input
-                  id="used-in-location"
-                  value={equipment.location}
-                  onChange={(e) =>
-                    handleInputChange('location', e.target.value)
-                  }
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="work-center">Work Center</Label>
-                <Select>
-                  <SelectTrigger id="work-center">
+                <Label htmlFor="workCenterId">Work Center</Label>
+                <Select
+                  value={equipment.workCenterId?.toString()}
+                  onValueChange={(v) => handleInputChange('workCenterId', Number(v))}
+                >
+                  <SelectTrigger id="workCenterId">
                     <SelectValue placeholder="Select a work center" />
                   </SelectTrigger>
                   <SelectContent>
-                    {workCenters.map((wc) => (
-                      <SelectItem key={wc.id} value={wc.id}>
+                    {meta.workCenters.map((wc) => (
+                      <SelectItem key={wc.id} value={wc.id.toString()}>
                         {wc.name}
                       </SelectItem>
                     ))}
@@ -376,5 +295,3 @@ export default function NewEquipmentPage() {
     </div>
   );
 }
-
-    

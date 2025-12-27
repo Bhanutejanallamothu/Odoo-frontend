@@ -22,9 +22,13 @@ export default function LoginForm() {
   const { toast } = useToast();
   const [email, setEmail] = React.useState('admin@example.com');
   const [password, setPassword] = React.useState('password');
+  const [loading, setLoading] = React.useState(false);
+
 
   React.useEffect(() => {
+    // Clear any existing tokens on login page load
     if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
       localStorage.removeItem('userRole');
       localStorage.removeItem('userId');
     }
@@ -32,21 +36,24 @@ export default function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      const user = await login(email, password);
+      const response = await login(email, password);
 
-      if (user) {
+      if (response.token && response.user) {
         if (typeof window !== 'undefined') {
-          localStorage.setItem('userRole', user.role);
-          localStorage.setItem('userId', user.id);
+          localStorage.setItem('token', response.token);
+          // Assuming user object is returned on login
+          localStorage.setItem('userRole', response.user.role);
+          localStorage.setItem('userId', String(response.user.id));
         }
 
         toast({
           title: 'Login Successful',
-          description: `Welcome back, ${user.name}!`,
+          description: `Welcome back, ${response.user.name}!`,
         });
 
-        if (user.role === 'employee') {
+        if (response.user.role === 'employee') {
           router.push('/my-requests');
         } else {
           router.push('/dashboard');
@@ -54,12 +61,14 @@ export default function LoginForm() {
       } else {
         throw new Error('Invalid credentials');
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Login Failed',
-        description: 'Invalid email or password. Please try again.',
+        description: error.message || 'Invalid email or password. Please try again.',
       });
+    } finally {
+        setLoading(false);
     }
   };
 
@@ -83,6 +92,7 @@ export default function LoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
               />
             </div>
             <div className="grid gap-2 text-left">
@@ -95,10 +105,11 @@ export default function LoginForm() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
               />
             </div>
-            <Button type="submit" className="w-full">
-              Login
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Logging in...' : 'Login'}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">

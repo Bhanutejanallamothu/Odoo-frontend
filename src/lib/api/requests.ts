@@ -1,54 +1,40 @@
+import { MaintenanceRequest, MaintenanceRequestStatus } from '@/lib/types';
+import request from '@/lib/api-client';
 
-import { MaintenanceRequest } from '@/lib/types';
-
-const API_URL = '/api/requests';
 
 export async function getRequests(filters: Record<string, string> = {}): Promise<MaintenanceRequest[]> {
   const query = new URLSearchParams(filters);
-  const response = await fetch(`${API_URL}?${query}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch requests');
-  }
-  return response.json();
+  return request(`/requests?${query}`);
 }
 
-export async function getRequestById(id: string): Promise<MaintenanceRequest> {
-  const response = await fetch(`${API_URL}/${id}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch request');
-  }
-  return response.json();
+export async function getRequestById(id: number): Promise<MaintenanceRequest> {
+  return request(`/requests/${id}`);
 }
 
-export async function createRequest(request: Omit<MaintenanceRequest, 'id'>): Promise<MaintenanceRequest> {
-  const response = await fetch(API_URL, {
+export async function createRequest(req: Partial<Omit<MaintenanceRequest, 'id'>>): Promise<MaintenanceRequest> {
+  return request('/requests', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(request),
+    body: JSON.stringify(req),
   });
-  if (!response.ok) {
-    throw new Error('Failed to create request');
-  }
-  return response.json();
 }
 
-export async function updateRequest(id: string, request: Partial<Omit<MaintenanceRequest, 'id'>>): Promise<MaintenanceRequest> {
-  const response = await fetch(`${API_URL}/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(request),
+export async function updateRequest(id: number, req: Partial<Omit<MaintenanceRequest, 'id'>>): Promise<MaintenanceRequest> {
+  return request(`/requests/${id}`, {
+    method: 'PUT', // Assuming PUT for updates
+    body: JSON.stringify(req),
   });
-  if (!response.ok) {
-    throw new Error('Failed to update request');
-  }
-  return response.json();
 }
 
-export async function deleteRequest(id: string): Promise<void> {
-  const response = await fetch(`${API_URL}/${id}`, {
+export async function updateRequestStatus(id: number, status: MaintenanceRequestStatus): Promise<MaintenanceRequest> {
+    return request(`/requests/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+    });
+}
+
+
+export async function deleteRequest(id: number): Promise<void> {
+  return request(`/requests/${id}`, {
     method: 'DELETE',
   });
-  if (!response.ok) {
-    throw new Error('Failed to delete request');
-  }
 }

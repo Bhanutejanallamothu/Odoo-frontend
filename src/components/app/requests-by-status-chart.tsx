@@ -17,19 +17,19 @@ const chartConfig = {
   count: {
     label: 'Count',
   },
-  New: {
+  NEW: {
     label: 'New',
     color: 'hsl(var(--chart-1))',
   },
-  'In Progress': {
+  IN_PROGRESS: {
     label: 'In Progress',
     color: 'hsl(var(--chart-2))',
   },
-  Repaired: {
+  REPAIRED: {
     label: 'Repaired',
     color: 'hsl(var(--chart-3))',
   },
-  Scrap: {
+  SCRAP: {
     label: 'Scrap',
     color: 'hsl(var(--chart-4))',
   },
@@ -53,6 +53,7 @@ export default function RequestsByStatusChart() {
         const data = Object.entries(statusData).map(([status, count]) => ({
           status,
           count,
+          fill: chartConfig[status as keyof typeof chartConfig]?.color,
         }));
         setChartData(data);
       } catch (error) {
@@ -76,7 +77,7 @@ export default function RequestsByStatusChart() {
       <PieChart>
         <ChartTooltip
           cursor={false}
-          content={<ChartTooltipContent hideLabel />}
+          content={<ChartTooltipContent hideLabel nameKey="status" />}
         />
         <Pie
           data={chartData}
@@ -85,13 +86,10 @@ export default function RequestsByStatusChart() {
           innerRadius={60}
           strokeWidth={5}
         >
-          {chartData.map((entry, index) => (
+          {chartData.map((entry) => (
             <Cell
-              key={`cell-${index}`}
-              fill={
-                chartConfig[entry.status as keyof typeof chartConfig]?.color ||
-                '#8884d8'
-              }
+              key={`cell-${entry.status}`}
+              fill={entry.fill}
             />
           ))}
         </Pie>

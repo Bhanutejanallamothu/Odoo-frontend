@@ -1,85 +1,84 @@
-
 import type { LucideIcon } from 'lucide-react';
 
 export type UserRole = 'admin' | 'manager' | 'technician' | 'employee';
 
 export type User = {
-  id: string;
+  id: number;
   name: string;
   email: string;
-  avatarUrl: string;
+  avatarUrl?: string; // Kept optional as backend might not provide it
   role: UserRole;
-  teamId?: string;
+  teamId?: number;
 };
 
-export type EquipmentStatus = 'Operational' | 'Under Maintenance' | 'Scrapped';
+export type EquipmentStatus = 'OPERATIONAL' | 'UNDER_MAINTENANCE' | 'SCRAPPED';
 
 export type Equipment = {
-  id: string;
+  id: number;
   name:string;
-  serialNumber: string;
-  department: string;
-  assignedEmployeeId?: string;
-  maintenanceTeamId: string;
-  assignedTechnicianId?: string;
-  purchaseDate: string; // ISO 8601
-  warrantyExpiry: string; // ISO 8601
-  location: string;
-  isScrapped: boolean;
+  serialNumber?: string;
+  department?: string;
+  assignedEmployeeId?: number;
+  maintenanceTeamId: number;
+  assignedTechnicianId?: number;
+  purchaseDate?: string; // ISO 8601
+  warrantyExpiry?: string; // ISO 8601
+  location?: string;
+  isScrapped?: boolean;
   status: EquipmentStatus;
-  category: string;
+  categoryId: number;
   health: number; // Percentage from 0 to 100
   assignedDate?: string; // ISO 8601
   description?: string;
+  category?: { id: number, name: string }; // Nested from GET /api/equipment
+  workCenterId?: number;
 };
 
 export type EquipmentCategory = {
-  id: string;
+  id: number;
   name: string;
   responsible: string;
-  company: string;
+  companyId: number;
 };
-
-export type TeamType = 'Mechanics' | 'Electricians' | 'IT';
 
 export type Team = {
-  id:string;
+  id: number;
   name: string;
-  members: string[];
+  members: number[]; // Array of user IDs
   totalMembers: number;
-  company: string;
+  companyId: number;
 };
 
-export type MaintenanceRequestStatus = 'New' | 'In Progress' | 'Repaired' | 'Scrap' | 'Blocked' | 'Ready for next stage';
-export type MaintenanceRequestPriority = 'High' | 'Medium' | 'Low';
-export type MaintenanceRequestType = 'Corrective' | 'Preventive';
+export type MaintenanceRequestStatus = 'NEW' | 'IN_PROGRESS' | 'REPAIRED' | 'SCRAP';
+export type MaintenanceRequestPriority = 'HIGH' | 'MEDIUM' | 'LOW';
+export type MaintenanceRequestType = 'CORRECTIVE' | 'PREVENTIVE';
 
 export type MaintenanceRequest = {
-  id: string;
+  id: number;
   subject: string;
-  equipmentId: string;
-  assignedTechnicianId: string;
-  dueDate: string; // ISO 8601
+  equipmentId: number;
+  assignedTechnicianId?: number;
+  dueDate: string; // ISO 8601 YYYY-MM-DD
   status: MaintenanceRequestStatus;
   requestType: MaintenanceRequestType;
   priority: MaintenanceRequestPriority;
   scheduledDate?: string; // ISO 8601
   duration?: number; // hours
   notes?: string;
-  teamId: string;
-  requesterId: string;
+  teamId: number;
+  requesterId: number;
 };
 
 export type WorkCenter = {
-  id: string;
+  id: number;
   name: string;
   description: string;
   department: string;
   tag?: string;
-  alternativeWorkCenterIds?: string[];
+  alternatives?: string;
   costPerHour?: number;
   capacity?: number;
-  oeeTarget?: number;
+  oee?: number;
 };
 
 

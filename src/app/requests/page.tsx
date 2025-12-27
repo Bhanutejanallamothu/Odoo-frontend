@@ -62,17 +62,24 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getRequests, createRequest, updateRequest } from '@/lib/api/requests';
+import { getRequests, createRequest, updateRequestStatus } from '@/lib/api/requests';
 import { getTeams } from '@/lib/api/teams';
 import { getUsers } from '@/lib/api/users';
 import { getAllEquipment } from '@/lib/api/equipment';
 
 const statusColumns: MaintenanceRequestStatus[] = [
-  'New',
-  'In Progress',
-  'Repaired',
-  'Scrap',
+  'NEW',
+  'IN_PROGRESS',
+  'REPAIRED',
+  'SCRAP',
 ];
+
+const statusDisplayMap: Record<MaintenanceRequestStatus, string> = {
+    NEW: 'New',
+    IN_PROGRESS: 'In Progress',
+    REPAIRED: 'Repaired',
+    SCRAP: 'Scrap'
+}
 
 // This wrapper ensures DndContext only renders on the client.
 function ClientOnlyDndContext({
@@ -107,9 +114,9 @@ export default function RequestsPage() {
   const [newRequest, setNewRequest] = React.useState<
     Partial<MaintenanceRequest>
   >({
-    status: 'New',
-    requestType: 'Corrective',
-    priority: 'Medium',
+    status: 'NEW',
+    requestType: 'CORRECTIVE',
+    priority: 'MEDIUM',
   });
 
   const equipmentIdParam = searchParams.get('equipmentId');
@@ -124,8 +131,8 @@ export default function RequestsPage() {
   }, [createParam, router]);
 
 
-  const [teamFilter, setTeamFilter] = React.useState<string[]>([]);
-  const [technicianFilter, setTechnicianFilter] = React.useState<string[]>([]);
+  const [teamFilter, setTeamFilter] = React.useState<number[]>([]);
+  const [technicianFilter, setTechnicianFilter] = React.useState<number[]>([]);
   const [requestTypeFilter, setRequestTypeFilter] = React.useState<string[]>(
     []
   );
@@ -170,14 +177,14 @@ export default function RequestsPage() {
   const filteredRequests = React.useMemo(() => {
     let result = requests;
     if (equipmentIdParam) {
-      result = result.filter((r) => r.equipmentId === equipmentIdParam);
+      result = result.filter((r) => r.equipmentId === Number(equipmentIdParam));
     }
     if (teamFilter.length > 0) {
       result = result.filter((r) => teamFilter.includes(r.teamId));
     }
     if (technicianFilter.length > 0) {
       result = result.filter((r) =>
-        technicianFilter.includes(r.assignedTechnicianId)
+        r.assignedTechnicianId && technicianFilter.includes(r.assignedTechnicianId)
       );
     }
     if (requestTypeFilter.length > 0) {
@@ -197,28 +204,25 @@ export default function RequestsPage() {
 
     if (!over) return;
 
-    const activeId = String(active.id);
-    const overId = String(over.id);
-    const activeContainer = active.data.current?.sortable.containerId;
+    const activeId = Number(active.id);
     const overContainer = over.data.current?.sortable?.containerId || over.id;
+    const activeContainer = active.data.current?.sortable.containerId;
 
     if (activeContainer !== overContainer) {
       const newStatus = overContainer as MaintenanceRequestStatus;
       const originalRequest = requests.find(r => r.id === activeId);
       if (!originalRequest) return;
 
+      // Optimistic UI update
       setRequests((prev) =>
         prev.map((r) => (r.id === activeId ? { ...r, status: newStatus } : r))
       );
 
       try {
-        const updatedRequest = await updateRequest(activeId, { status: newStatus });
-        setRequests((prev) =>
-          prev.map((r) => (r.id === activeId ? updatedRequest : r))
-        );
+        await updateRequestStatus(activeId, newStatus);
         toast({
           title: 'Status Updated',
-          description: `Request moved to ${newStatus}.`,
+          description: `Request moved to ${statusDisplayMap[newStatus]}.`,
         });
       } catch (error) {
         console.error(error);
@@ -235,11 +239,16 @@ export default function RequestsPage() {
         );
       }
     } else {
-      const activeIndex = requests.findIndex((r) => r.id === activeId);
-      const overIndex = requests.findIndex((r) => r.id === overId);
-      if (activeIndex !== -1 && overIndex !== -1) {
-        setRequests((prev) => arrayMove(prev, activeIndex, overIndex));
-      }
+        // Reordering within the same column
+        const activeIndex = filteredRequests.findIndex((r) => r.id === active.id);
+        const overIndex = filteredRequests.findIndex((r) => r.id === over.id);
+        if (activeIndex !== overIndex) {
+            setRequests((items) => {
+                const oldIndex = items.findIndex(item => item.id === active.id);
+                const newIndex = items.findIndex(item => item.id === over.id);
+                return arrayMove(items, oldIndex, newIndex);
+            });
+        }
     }
   };
 
@@ -248,8 +257,7 @@ export default function RequestsPage() {
       !newRequest.subject ||
       !newRequest.equipmentId ||
       !newRequest.dueDate ||
-      !newRequest.teamId ||
-      !newRequest.assignedTechnicianId
+      !newRequest.teamId
     ) {
       toast({
         variant: 'destructive',
@@ -262,19 +270,16 @@ export default function RequestsPage() {
     try {
       const requestToCreate = {
         ...newRequest,
-        requesterId: 'user-1', // Mock user until auth is complete
-        ...(newRequest.requestType === 'Preventive' && {
-          scheduledDate: newRequest.dueDate,
-        }),
+        requesterId: Number(localStorage.getItem('userId')), // Mock user until auth is complete
       } as Omit<MaintenanceRequest, 'id'>;
 
       const createdRequest = await createRequest(requestToCreate);
       setRequests((prev) => [createdRequest, ...prev]);
       setIsModalOpen(false);
       setNewRequest({
-        status: 'New',
-        requestType: 'Corrective',
-        priority: 'Medium',
+        status: 'NEW',
+        requestType: 'CORRECTIVE',
+        priority: 'MEDIUM',
       });
 
       toast({
@@ -326,7 +331,7 @@ export default function RequestsPage() {
           {equipmentIdParam && (
             <p className="text-muted-foreground">
               Showing requests for:{' '}
-              {equipment.find((e) => e.id === equipmentIdParam)?.name}
+              {equipment.find((e) => e.id === Number(equipmentIdParam))?.name}
             </p>
           )}
         </div>
@@ -385,7 +390,7 @@ export default function RequestsPage() {
                 </div>
                 <div className="grid gap-2">
                   <h5 className="text-sm font-medium">Request Type</h5>
-                  {['Corrective', 'Preventive'].map((type) => (
+                  {['CORRECTIVE', 'PREVENTIVE'].map((type) => (
                     <div key={type} className="flex items-center space-x-2">
                       <Checkbox
                         id={`type-${type}`}
@@ -398,7 +403,7 @@ export default function RequestsPage() {
                           );
                         }}
                       />
-                      <Label htmlFor={`type-${type}`}>{type}</Label>
+                      <Label htmlFor={`type-${type}`}>{type.charAt(0) + type.slice(1).toLowerCase()}</Label>
                     </div>
                   ))}
                 </div>
@@ -420,7 +425,7 @@ export default function RequestsPage() {
           {statusColumns.map((status) => (
             <Card key={status} className="flex flex-col h-full bg-card/50">
               <CardHeader>
-                <CardTitle>{status}</CardTitle>
+                <CardTitle>{statusDisplayMap[status]}</CardTitle>
                 <CardDescription>
                   {
                     filteredRequests.filter((r) => r.status === status).length
@@ -484,15 +489,15 @@ export default function RequestsPage() {
                 Equipment
               </Label>
               <Select
-                value={newRequest.equipmentId}
+                value={newRequest.equipmentId?.toString()}
                 onValueChange={(value) => {
                   const selectedEquipment = equipment.find(
-                    (e) => e.id === value
+                    (e) => e.id === Number(value)
                   );
                   if (selectedEquipment) {
                     setNewRequest({
                       ...newRequest,
-                      equipmentId: value,
+                      equipmentId: Number(value),
                       teamId: selectedEquipment.maintenanceTeamId,
                     });
                   }
@@ -503,7 +508,7 @@ export default function RequestsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {equipment.map((e) => (
-                    <SelectItem key={e.id} value={e.id}>
+                    <SelectItem key={e.id} value={e.id.toString()}>
                       {e.name}
                     </SelectItem>
                   ))}
@@ -516,7 +521,7 @@ export default function RequestsPage() {
               </Label>
               <Select
                 value={newRequest.requestType}
-                onValueChange={(value: 'Corrective' | 'Preventive') =>
+                onValueChange={(value: 'CORRECTIVE' | 'PREVENTIVE') =>
                   setNewRequest({ ...newRequest, requestType: value })
                 }
               >
@@ -524,8 +529,8 @@ export default function RequestsPage() {
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Corrective">Corrective</SelectItem>
-                  <SelectItem value="Preventive">Preventive</SelectItem>
+                  <SelectItem value="CORRECTIVE">Corrective</SelectItem>
+                  <SelectItem value="PREVENTIVE">Preventive</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -543,15 +548,15 @@ export default function RequestsPage() {
                   <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="High">High</SelectItem>
-                  <SelectItem value="Medium">Medium</SelectItem>
-                  <SelectItem value="Low">Low</SelectItem>
+                  <SelectItem value="HIGH">High</SelectItem>
+                  <SelectItem value="MEDIUM">Medium</SelectItem>
+                  <SelectItem value="LOW">Low</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="due-date" className="text-right">
-                {newRequest.requestType === 'Preventive'
+                {newRequest.requestType === 'PREVENTIVE'
                   ? 'Scheduled Date'
                   : 'Due Date'}
               </Label>
@@ -572,11 +577,11 @@ export default function RequestsPage() {
                 Team
               </Label>
               <Select
-                value={newRequest.teamId}
+                value={newRequest.teamId?.toString()}
                 onValueChange={(value) =>
                   setNewRequest({
                     ...newRequest,
-                    teamId: value,
+                    teamId: Number(value),
                     assignedTechnicianId: undefined,
                   })
                 }
@@ -586,7 +591,7 @@ export default function RequestsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {teams.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
+                    <SelectItem key={t.id} value={t.id.toString()}>
                       {t.name}
                     </SelectItem>
                   ))}
@@ -598,9 +603,9 @@ export default function RequestsPage() {
                 Technician
               </Label>
               <Select
-                value={newRequest.assignedTechnicianId}
+                value={newRequest.assignedTechnicianId?.toString()}
                 onValueChange={(value) =>
-                  setNewRequest({ ...newRequest, assignedTechnicianId: value })
+                  setNewRequest({ ...newRequest, assignedTechnicianId: Number(value) })
                 }
                 disabled={!newRequest.teamId}
               >
@@ -615,7 +620,7 @@ export default function RequestsPage() {
                         u.role === 'technician'
                     )
                     .map((u) => (
-                      <SelectItem key={u.id} value={u.id}>
+                      <SelectItem key={u.id} value={u.id.toString()}>
                         {u.name}
                       </SelectItem>
                     ))}
@@ -634,23 +639,6 @@ export default function RequestsPage() {
                 }
                 className="col-span-3"
                 placeholder="Add any relevant notes..."
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="duration" className="text-right">
-                Duration (h)
-              </Label>
-              <Input
-                id="duration"
-                type="number"
-                value={newRequest.duration || ''}
-                onChange={(e) =>
-                  setNewRequest({
-                    ...newRequest,
-                    duration: parseInt(e.target.value),
-                  })
-                }
-                className="col-span-3"
               />
             </div>
           </div>

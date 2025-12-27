@@ -31,6 +31,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getRequests } from '@/lib/api/requests';
 import { getAllEquipment } from '@/lib/api/equipment';
 import { getUsers } from '@/lib/api/users';
+import request from '@/lib/api-client';
+
+async function getDashboardSummary() {
+    return request('/dashboard');
+}
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -38,20 +43,23 @@ export default function DashboardPage() {
   const [maintenanceRequests, setMaintenanceRequests] = React.useState<MaintenanceRequest[]>([]);
   const [allEquipment, setAllEquipment] = React.useState<Equipment[]>([]);
   const [users, setUsers] = React.useState<User[]>([]);
+  const [summary, setSummary] = React.useState<{ critical: number, open: number, overdue: number } | null>(null);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [requests, equipment, users] = await Promise.all([
+        const [requests, equipment, users, summaryData] = await Promise.all([
           getRequests(),
           getAllEquipment(),
           getUsers(),
+          getDashboardSummary(),
         ]);
         setMaintenanceRequests(requests);
         setAllEquipment(equipment);
         setUsers(users);
+        setSummary(summaryData);
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
       } finally {
@@ -61,27 +69,20 @@ export default function DashboardPage() {
     fetchData();
   }, []);
 
-  const openRequests = maintenanceRequests.filter(
-    (r) => r.status === 'New' || r.status === 'In Progress'
-  );
-  const overdueRequests = openRequests.filter(
-    (r) => new Date(r.dueDate) < new Date()
-  );
-
-  const criticalEquipmentCount = allEquipment.filter(
-    (e) => e.health < 30 && e.status !== 'Scrapped'
-  ).length;
+  const openRequestsCount = summary?.open ?? 0;
+  const overdueRequestsCount = summary?.overdue ?? 0;
+  const criticalEquipmentCount = summary?.critical ?? 0;
 
   const technicians = users.filter((u) => u.role === 'technician');
   const assignedTechnicians = new Set(
-    openRequests.map((r) => r.assignedTechnicianId)
+    maintenanceRequests.filter(r => r.status === 'IN_PROGRESS' || r.status === 'NEW').map((r) => r.assignedTechnicianId)
   );
   const technicianLoad =
     technicians.length > 0
       ? Math.round((assignedTechnicians.size / technicians.length) * 100)
       : 0;
 
-  const handleRowClick = (requestId: string) => {
+  const handleRowClick = (requestId: number) => {
     router.push(`/requests/${requestId}`);
   };
 
@@ -170,10 +171,10 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600 dark:text-green-500">
-              {openRequests.length} Pending
+              {openRequestsCount} Pending
             </div>
             <p className="text-xs text-green-600/80 dark:text-green-400/80">
-              {overdueRequests.length} Overdue
+              {overdueRequestsCount} Overdue
             </p>
           </CardContent>
         </Card>
@@ -209,11 +210,18 @@ export default function DashboardPage() {
                     | 'default'
                     | 'destructive';
                 } = {
-                  New: 'outline',
-                  'In Progress': 'secondary',
-                  Repaired: 'default',
-                  Scrap: 'destructive',
+                  NEW: 'outline',
+                  IN_PROGRESS: 'secondary',
+                  REPAIRED: 'default',
+                  SCRAP: 'destructive',
                 };
+                
+                const statusDisplay: {[key: string]: string} = {
+                    NEW: 'New',
+                    IN_PROGRESS: 'In Progress',
+                    REPAIRED: 'Repaired',
+                    SCRAP: 'Scrap'
+                }
 
                 return (
                   <TableRow
@@ -226,10 +234,10 @@ export default function DashboardPage() {
                     <TableCell>
                       {technician?.name || 'Unassigned'}
                     </TableCell>
-                    <TableCell>{equip?.category || 'N/A'}</TableCell>
+                    <TableCell>{equip?.category?.name || 'N/A'}</TableCell>
                     <TableCell>
                       <Badge variant={statusVariant[request.status]}>
-                        {request.status}
+                        {statusDisplay[request.status]}
                       </Badge>
                     </TableCell>
                     <TableCell>GearGuard Inc.</TableCell>

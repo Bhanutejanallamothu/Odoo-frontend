@@ -1,12 +1,7 @@
-
 import { User } from '@/lib/types';
-
-const API_URL = '/api/users';
+import request from '@/lib/api-client';
 
 export async function getUsers(): Promise<User[]> {
-  const response = await fetch(API_URL);
-  if (!response.ok) {
-    throw new Error('Failed to fetch users');
-  }
-  return response.json();
+  // Assuming there's a /users endpoint
+  return request('/users');
 }

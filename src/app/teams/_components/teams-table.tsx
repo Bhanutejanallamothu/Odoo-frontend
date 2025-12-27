@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -18,7 +17,6 @@ type TeamsTableProps = {
 };
 
 export default function TeamsTable({ teams, onRowClick }: TeamsTableProps) {
-
   return (
     <div className="rounded-md border bg-card/50">
       <Table>
@@ -26,7 +24,7 @@ export default function TeamsTable({ teams, onRowClick }: TeamsTableProps) {
           <TableRow>
             <TableHead>Team Name</TableHead>
             <TableHead>Total Members</TableHead>
-            <TableHead>Team Members</TableHead>
+            <TableHead>Team Member IDs</TableHead>
             <TableHead>Company</TableHead>
           </TableRow>
         </TableHeader>
@@ -36,7 +34,7 @@ export default function TeamsTable({ teams, onRowClick }: TeamsTableProps) {
               <TableCell className="font-medium">{team.name}</TableCell>
               <TableCell>{team.totalMembers}</TableCell>
               <TableCell>{team.members.join(', ')}</TableCell>
-              <TableCell>{team.company}</TableCell>
+              <TableCell>My Company</TableCell>
             </TableRow>
           ))}
         </TableBody>
