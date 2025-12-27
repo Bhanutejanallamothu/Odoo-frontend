@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { login } from '@/lib/api/auth';
 
-export default function LoginForm() {
+export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [email, setEmail] = React.useState('admin@example.com');

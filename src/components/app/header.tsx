@@ -27,6 +27,7 @@ import { NavItem, UserRole } from '@/lib/types';
 
 const allNavItems: NavItem[] = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiredRoles: ['admin', 'manager', 'technician'] },
+    { href: '/requests', label: 'Requests', icon: Wrench, requiredRoles: ['admin', 'manager', 'technician'] },
     { href: '/equipment', label: 'Equipment', icon: Wrench, requiredRoles: ['admin', 'manager', 'technician'] },
     { href: '/equipment-categories', label: 'Equipment Categories', icon: Shapes, requiredRoles: ['admin', 'manager', 'technician'] },
     { href: '/work-centers', label: 'Work Centers', icon: Building, requiredRoles: ['admin', 'manager', 'technician'] },
@@ -41,7 +42,7 @@ export default function Header() {
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const role = localStorage.getItem('userRole') as UserRole;
-      setUserRole(role || 'admin'); // Default to admin for storybook/dev
+      setUserRole(role);
     }
   }, [pathname]);
 
@@ -55,9 +56,13 @@ export default function Header() {
     return allNavItems.filter(item => item.requiredRoles.includes(userRole));
   }, [userRole]);
 
-  if (!userRole) {
-    // Render a placeholder or null until role is determined
-    return (
+  if (pathname === '/login' || pathname === '/register') {
+    return null;
+  }
+  
+  // Render a placeholder while determining the role on authenticated pages
+  if (!userRole && pathname !== '/login' && pathname !== '/register') {
+     return (
        <header className="fixed top-4 left-1/2 -translate-x-1/2 z-30 flex h-16 items-center gap-4 border border-white/10 bg-white/5 px-4 md:px-6 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 rounded-lg w-[calc(100%-2rem)] max-w-7xl">
          <div className="flex items-center gap-4">
             <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
@@ -68,6 +73,7 @@ export default function Header() {
        </header>
     )
   }
+
 
   return (
     <header className="fixed top-4 left-1/2 -translate-x-1/2 z-30 flex h-16 items-center gap-4 border border-white/10 bg-white/5 px-4 md:px-6 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 rounded-lg w-[calc(100%-2rem)] max-w-7xl">
