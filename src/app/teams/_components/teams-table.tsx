@@ -10,24 +10,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { Team, User } from '@/lib/types';
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 type TeamsTableProps = {
   teams: Team[];
   users: User[];
-  onEdit: (team: Team) => void;
-  onDelete: (team: Team) => void;
+  onRowClick: (team: Team) => void;
 };
 
-export default function TeamsTable({ teams, users, onEdit, onDelete }: TeamsTableProps) {
+export default function TeamsTable({ teams, users, onRowClick }: TeamsTableProps) {
   const getTeamMemberNames = (memberIds: string[]) => {
     return memberIds
       .map((id) => users.find((u) => u.id === id)?.name)
@@ -47,7 +38,7 @@ export default function TeamsTable({ teams, users, onEdit, onDelete }: TeamsTabl
         </TableHeader>
         <TableBody>
           {teams.map((team) => (
-            <TableRow key={team.id}>
+            <TableRow key={team.id} onClick={() => onRowClick(team)} className="cursor-pointer">
               <TableCell className="font-medium">{team.name}</TableCell>
               <TableCell>{getTeamMemberNames(team.memberIds)}</TableCell>
               <TableCell>My Company (San Francisco)</TableCell>
