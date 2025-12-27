@@ -10,21 +10,91 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
-import { teams, users } from '@/lib/mock-data';
-import { Team } from '@/lib/types';
+import { teams as initialTeams, users } from '@/lib/mock-data';
+import { Team, User } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
+import TeamsTable from './_components/teams-table';
+import TeamForm from './_components/team-form';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export default function TeamsPage() {
-  const getTeamMemberNames = (memberIds: string[]) => {
-    return memberIds.map(id => users.find(u => u.id === id)?.name).filter(Boolean).join(', ');
-  }
+  const { toast } = useToast();
+  const [teams, setTeams] = React.useState<Team[]>(initialTeams);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
+  const [currentTeam, setCurrentTeam] = React.useState<Team | null>(null);
+
+  const handleAddNew = () => {
+    setCurrentTeam(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (team: Team) => {
+    setCurrentTeam(team);
+    setIsModalOpen(true);
+  };
+  
+  const handleDelete = (team: Team) => {
+    setCurrentTeam(team);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (currentTeam) {
+      setTeams(teams.filter(t => t.id !== currentTeam.id));
+      toast({
+        title: 'Team Deleted',
+        description: `"${currentTeam.name}" has been successfully deleted.`,
+      });
+    }
+    setIsDeleteDialogOpen(false);
+    setCurrentTeam(null);
+  };
+
+  const handleSave = (formData: Omit<Team, 'id' | 'type' | 'memberIds'> & { memberNames: string }) => {
+    const memberIds = users
+      .filter(u => formData.memberNames.split(',').map(s => s.trim()).includes(u.name))
+      .map(u => u.id);
+
+    if (currentTeam) {
+      // Edit existing
+      const updatedTeam = { 
+        ...currentTeam, 
+        name: formData.name,
+        memberIds: memberIds
+      };
+      setTeams(teams.map(t => t.id === currentTeam.id ? updatedTeam : t));
+      toast({
+        title: 'Team Updated',
+        description: `"${formData.name}" has been successfully updated.`,
+      });
+    } else {
+      // Add new
+      const newTeam: Team = {
+        id: `team-${Date.now()}`,
+        name: formData.name,
+        type: 'Mechanics', // Default type for new teams
+        memberIds: memberIds
+      };
+      setTeams([newTeam, ...teams]);
+      toast({
+        title: 'Team Created',
+        description: `"${formData.name}" has been successfully created.`,
+      });
+    }
+    setIsModalOpen(false);
+    setCurrentTeam(null);
+  };
+
 
   return (
     <div className="flex flex-col gap-8">
@@ -32,7 +102,7 @@ export default function TeamsPage() {
         <h1 className="text-3xl font-bold tracking-tight font-headline">
           Maintenance Teams
         </h1>
-        <Button>
+        <Button onClick={handleAddNew}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Create Team
         </Button>
@@ -45,26 +115,39 @@ export default function TeamsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Team Name</TableHead>
-                <TableHead>Team Members</TableHead>
-                <TableHead>Company</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {teams.map((team) => (
-                <TableRow key={team.id}>
-                  <TableCell className="font-medium">{team.name}</TableCell>
-                  <TableCell>{getTeamMemberNames(team.memberIds)}</TableCell>
-                  <TableCell>My Company (San Francisco)</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+           <TeamsTable 
+              teams={teams}
+              users={users}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+           />
         </CardContent>
       </Card>
+      
+      <TeamForm
+        isOpen={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onSave={handleSave}
+        team={currentTeam}
+        users={users}
+      />
+      
+       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the team
+              "{currentTeam?.name}".
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Continue</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   );
 }
