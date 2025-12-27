@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import Beams from '@/components/Beams';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -24,40 +25,59 @@ export default function LoginForm() {
     router.push('/dashboard');
   };
   return (
-    <Card className="mx-auto max-w-sm w-full">
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-headline">Login</CardTitle>
-        <CardDescription>
-          Enter your email below to login to your account
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="grid gap-4">
-          <div className="grid gap-2 text-left">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              required
-              defaultValue="technician@example.com"
-            />
+    <div className="relative flex min-h-screen w-full flex-col items-center justify-center">
+      <div className="absolute inset-0 z-[-1]">
+        <Beams
+          beamWidth={2}
+          beamHeight={15}
+          beamNumber={12}
+          lightColor="#4682B4"
+          speed={2}
+          noiseIntensity={0.25}
+          scale={0.2}
+          rotation={-25}
+        />
+      </div>
+      <Card className="mx-auto w-full max-w-sm bg-card/80 backdrop-blur-sm">
+        <CardHeader className="text-center">
+          <CardTitle className="font-headline text-2xl">Login</CardTitle>
+          <CardDescription>
+            Enter your email below to login to your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            <div className="grid gap-2 text-left">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="m@example.com"
+                required
+                defaultValue="technician@example.com"
+              />
+            </div>
+            <div className="grid gap-2 text-left">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                required
+                defaultValue="password"
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              Login
+            </Button>
+          </form>
+          <div className="mt-4 text-center text-sm">
+            Don&apos;t have an account?{' '}
+            <Link href="/register" className="underline">
+              Sign up
+            </Link>
           </div>
-          <div className="grid gap-2 text-left">
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" required defaultValue="password" />
-          </div>
-          <Button type="submit" className="w-full">
-            Login
-          </Button>
-        </form>
-        <div className="mt-4 text-center text-sm">
-          Don&apos;t have an account?{' '}
-          <Link href="/register" className="underline">
-            Sign up
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
