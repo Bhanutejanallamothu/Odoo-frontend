@@ -1,10 +1,14 @@
 'use client';
+import * as React from 'react';
 import {
   Activity,
   AlertTriangle,
   CheckCircle,
   Construction,
   Wrench,
+  Search,
+  ChevronDown,
+  PlusCircle,
 } from 'lucide-react';
 import {
   Card,
@@ -21,15 +25,31 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import {
   maintenanceRequests,
   equipment as allEquipment,
+  teams,
 } from '@/lib/mock-data';
 import RequestsByStatusChart from '@/components/app/requests-by-status-chart';
 import RequestsByTeamChart from '@/components/app/requests-by-team-chart';
+import { MaintenanceRequestStatus } from '@/lib/types';
+import Link from 'next/link';
 
 export default function DashboardPage() {
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [statusFilters, setStatusFilters] = React.useState<string[]>([]);
+  
   const openRequests = maintenanceRequests.filter(
     (r) => r.status === 'New' || r.status === 'In Progress'
   ).length;
@@ -39,9 +59,26 @@ export default function DashboardPage() {
       new Date(r.dueDate) < new Date()
   ).length;
 
-  const recentRequests = [...maintenanceRequests]
-    .sort((a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime())
-    .slice(0, 5);
+  const filteredRecentRequests = React.useMemo(() => {
+    return [...maintenanceRequests]
+      .sort((a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime())
+      .filter(req => {
+        const equipmentName = allEquipment.find(e => e.id === req.equipmentId)?.name || '';
+        return (
+          (req.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          equipmentName.toLowerCase().includes(searchTerm.toLowerCase())) &&
+          (statusFilters.length === 0 || statusFilters.includes(req.status))
+        )
+      })
+      .slice(0, 5);
+  }, [searchTerm, statusFilters]);
+
+  const toggleFilter = (filterList: string[], setFilterList: React.Dispatch<React.SetStateAction<string[]>>, value: string) => {
+    const newFilterList = filterList.includes(value)
+      ? filterList.filter((item) => item !== value)
+      : [...filterList, value];
+    setFilterList(newFilterList);
+  };
 
   const statusColors: { [key: string]: string } = {
     New: 'bg-gray-500',
@@ -50,11 +87,51 @@ export default function DashboardPage() {
     Scrap: 'bg-red-500',
   };
 
+  const allStatuses: MaintenanceRequestStatus[] = ['New', 'In Progress', 'Repaired', 'Scrap'];
+
   return (
     <div className="flex flex-col gap-8">
-      <h1 className="text-3xl font-bold tracking-tight font-headline">
-        Dashboard
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight font-headline">
+          Dashboard
+        </h1>
+        <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search requests..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 max-w-sm"
+              />
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-auto">
+                  Status <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {allStatuses.map((status) => (
+                  <DropdownMenuCheckboxItem
+                    key={status}
+                    checked={statusFilters.includes(status)}
+                    onCheckedChange={() => toggleFilter(statusFilters, setStatusFilters, status)}
+                  >
+                    {status}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+             <Button asChild>
+              <Link href="/requests">
+                <PlusCircle className="mr-2 h-4 w-4" /> New Request
+              </Link>
+            </Button>
+          </div>
+      </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -157,7 +234,7 @@ export default function DashboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {recentRequests.map((req) => (
+              {filteredRecentRequests.map((req) => (
                 <TableRow key={req.id}>
                   <TableCell className="font-medium">{req.subject}</TableCell>
                   <TableCell>
