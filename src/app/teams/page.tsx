@@ -1,3 +1,4 @@
+
 'use client';
 import * as React from 'react';
 import {
@@ -100,14 +101,14 @@ export default function TeamsPage() {
 
   const handleSave = async (
     formData: Omit<Team, 'id' | 'type' | 'memberIds'> & {
-      memberNames: string;
+      members: string[];
     }
   ) => {
     const memberIds = users
       .filter((u) =>
-        formData.memberNames
-          .split(',')
+        formData.members
           .map((s) => s.trim())
+          .filter(Boolean)
           .includes(u.name)
       )
       .map((u) => u.id);
