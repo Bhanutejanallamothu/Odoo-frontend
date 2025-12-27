@@ -142,17 +142,31 @@ export default function DashboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow className="border-t border-dashed">
-                <TableCell>Test activity</TableCell>
-                <TableCell>Mitchell Admin</TableCell>
-                <TableCell>Aka Foster</TableCell>
-                <TableCell>Computer</TableCell>
-                <TableCell>
-                    <Badge variant="outline">New Request</Badge>
-                </TableCell>
-                <TableCell>My company</TableCell>
-              </TableRow>
-               {/* Add more rows as needed */}
+                {maintenanceRequests.slice(0, 5).map(request => {
+                    const employee = users.find(u => u.id === request.requesterId);
+                    const technician = users.find(u => u.id === request.assignedTechnicianId);
+                    const equip = allEquipment.find(e => e.id === request.equipmentId);
+                    
+                    const statusVariant: { [key: string]: 'outline' | 'secondary' | 'default' | 'destructive'} = {
+                        'New': 'outline',
+                        'In Progress': 'secondary',
+                        'Repaired': 'default',
+                        'Scrap': 'destructive'
+                    };
+
+                    return (
+                      <TableRow key={request.id} className="border-t border-dashed">
+                        <TableCell>{request.subject}</TableCell>
+                        <TableCell>{employee?.name || 'N/A'}</TableCell>
+                        <TableCell>{technician?.name || 'Unassigned'}</TableCell>
+                        <TableCell>{equip?.category || 'N/A'}</TableCell>
+                        <TableCell>
+                            <Badge variant={statusVariant[request.status]}>{request.status}</Badge>
+                        </TableCell>
+                        <TableCell>GearGuard Inc.</TableCell>
+                      </TableRow>
+                    );
+                })}
             </TableBody>
           </Table>
         </CardContent>
