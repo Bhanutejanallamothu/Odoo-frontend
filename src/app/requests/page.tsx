@@ -148,9 +148,13 @@ export default function RequestsPage() {
       id: newId,
     } as MaintenanceRequest;
 
+    if (requestToAdd.requestType === 'Preventive') {
+      requestToAdd.scheduledDate = newRequest.dueDate;
+    }
+
     setRequests(prev => [requestToAdd, ...prev]);
     setIsModalOpen(false);
-    setNewRequest({ status: 'New', requestType: 'Corrective' });
+    setNewRequest({ status: 'New', requestType: 'Corrective', priority: 'Medium' });
 
     toast({
       title: 'Success',
@@ -353,7 +357,7 @@ export default function RequestsPage() {
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="due-date" className="text-right">
-                Due Date
+                {newRequest.requestType === 'Preventive' ? 'Scheduled Date' : 'Due Date'}
               </Label>
               <Input
                 id="due-date"
@@ -411,6 +415,18 @@ export default function RequestsPage() {
                 className="col-span-3"
                 placeholder="Add any relevant notes..."
               />
+            </div>
+             <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="duration" className="text-right">
+                    Duration (h)
+                </Label>
+                <Input
+                    id="duration"
+                    type="number"
+                    value={newRequest.duration || ''}
+                    onChange={(e) => setNewRequest({ ...newRequest, duration: parseInt(e.target.value) })}
+                    className="col-span-3"
+                />
             </div>
           </div>
           <DialogFooter>

@@ -8,9 +8,11 @@ import {
   format,
   getDay,
   isEqual,
+  isSameDay,
   isSameMonth,
   isToday,
   parse,
+  parseISO,
   startOfToday,
 } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -95,11 +97,6 @@ export function MaintenanceCalendar({ requests, teams }: { requests: Maintenance
                 isEqual(day, selectedDay) && 'text-white',
                 !isEqual(day, selectedDay) && isToday(day) && 'text-primary',
                 !isEqual(day, selectedDay) &&
-                  !isToday(day) &&
-                  isSameMonth(day, firstDayCurrentMonth) &&
-                  'text-foreground',
-                !isEqual(day, selectedDay) &&
-                  !isToday(day) &&
                   !isSameMonth(day, firstDayCurrentMonth) &&
                   'text-muted-foreground',
                 isEqual(day, selectedDay) && isToday(day) && 'bg-primary',
@@ -115,7 +112,7 @@ export function MaintenanceCalendar({ requests, teams }: { requests: Maintenance
               </time>
             </button>
              <div className="w-full text-center">
-               {requests.filter(req => req.scheduledDate && isEqual(parse(req.scheduledDate, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", new Date()), day)).map(req => (
+               {requests.filter(req => req.scheduledDate && isSameDay(parseISO(req.scheduledDate), day)).map(req => (
                  <div key={req.id} className={cn("text-xs p-1 rounded-md mt-1 truncate text-white", getTeamColor(req.teamId, teams))}>
                     {req.subject}
                  </div>
