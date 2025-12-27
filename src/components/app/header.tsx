@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -13,7 +12,6 @@ import {
   PanelLeft,
   LogOut,
   LineChart,
-  ClipboardList,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,9 +24,8 @@ import { NavItem, UserRole } from '@/lib/types';
 
 const allNavItems: NavItem[] = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiredRoles: ['admin', 'manager', 'technician'] },
-    { href: '/my-requests', label: 'My Requests', icon: ClipboardList, requiredRoles: ['employee'] },
     { href: '/equipment', label: 'Equipment', icon: Wrench, requiredRoles: ['admin', 'manager', 'technician'] },
-    { href: '/calendar', label: 'Calendar', icon: Calendar, requiredRoles: ['admin', 'manager', 'technician'] },
+    { href: '/calendar', label: 'Maintenance Calendar', icon: Calendar, requiredRoles: ['admin', 'manager', 'technician'] },
     { href: '/reporting', label: 'Reporting', icon: LineChart, requiredRoles: ['admin', 'manager'] },
     { href: '/teams', label: 'Teams', icon: Users, requiredRoles: ['admin', 'manager'] },
 ];
@@ -40,7 +37,7 @@ export default function Header() {
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const role = localStorage.getItem('userRole') as UserRole;
-      setUserRole(role);
+      setUserRole(role || 'admin'); // Default to admin for storybook/dev
     }
   }, [pathname]);
 
@@ -48,6 +45,20 @@ export default function Header() {
     if (!userRole) return [];
     return allNavItems.filter(item => item.requiredRoles.includes(userRole));
   }, [userRole]);
+
+  if (!userRole) {
+    // Render a placeholder or null until role is determined
+    return (
+       <header className="fixed top-4 left-1/2 -translate-x-1/2 z-30 flex h-16 items-center gap-4 border border-white/10 bg-white/5 px-4 md:px-6 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 rounded-lg w-[calc(100%-2rem)] max-w-7xl">
+         <div className="flex items-center gap-4">
+            <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
+              <FolderGit2 className="h-6 w-6 text-primary" />
+              <span className="font-headline text-lg">GearGuard</span>
+            </Link>
+          </div>
+       </header>
+    )
+  }
 
   return (
     <header className="fixed top-4 left-1/2 -translate-x-1/2 z-30 flex h-16 items-center gap-4 border border-white/10 bg-white/5 px-4 md:px-6 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 rounded-lg w-[calc(100%-2rem)] max-w-7xl">
