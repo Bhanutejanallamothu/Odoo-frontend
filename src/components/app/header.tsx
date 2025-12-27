@@ -71,7 +71,7 @@ export default function Header() {
             href={item.href}
             className={cn(
               "text-sm font-medium transition-colors hover:text-primary",
-              pathname.startsWith(item.href) ? "text-primary" : "text-muted-foreground"
+              pathname.startsWith(item.href) && item.href !== '/' ? "text-primary" : "text-muted-foreground"
             )}
           >
             {item.label}
