@@ -40,6 +40,7 @@ import WorkflowIndicator from '@/components/app/workflow-indicator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import StatusIndicator from '@/components/app/status-indicator';
 
 export default function MaintenanceRequestDetailPage() {
   const router = useRouter();
@@ -69,6 +70,11 @@ export default function MaintenanceRequestDetailPage() {
 
   const handleMaintenanceForChange = (value: string) => {
     setMaintenanceFor(value);
+    if(value === 'work_center') {
+        if(request) {
+            setRequest({ ...request, equipmentId: '' });
+        }
+    }
   };
 
   const handleInputChange = (
@@ -346,20 +352,28 @@ export default function MaintenanceRequestDetailPage() {
               <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="status">Status</Label>
-                    <Select
-                      value={request.status}
-                      onValueChange={(v: MaintenanceRequestStatus) => handleSelectChange('status', v)}
-                    >
-                      <SelectTrigger id="status">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="New">New</SelectItem>
-                        <SelectItem value="In Progress">In Progress</SelectItem>
-                        <SelectItem value="Repaired">Repaired</SelectItem>
-                        <SelectItem value="Scrap">Scrap</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center gap-2">
+                       <StatusIndicator 
+                         currentStatus={request.status} 
+                         onChange={(newStatus) => handleSelectChange('status', newStatus)}
+                       />
+                       <Select
+                          value={request.status}
+                          onValueChange={(v: MaintenanceRequestStatus) => handleSelectChange('status', v)}
+                        >
+                          <SelectTrigger id="status">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="New">New</SelectItem>
+                            <SelectItem value="In Progress">In Progress</SelectItem>
+                            <SelectItem value="Repaired">Repaired</SelectItem>
+                            <SelectItem value="Scrap">Scrap</SelectItem>
+                             <SelectItem value="Blocked">Blocked</SelectItem>
+                             <SelectItem value="Ready for next stage">Ready for next stage</SelectItem>
+                          </SelectContent>
+                        </Select>
+                    </div>
                   </div>
                    <div className="grid gap-2">
                     <Label htmlFor="priority">Priority</Label>

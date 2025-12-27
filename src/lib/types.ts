@@ -38,7 +38,7 @@ export type Team = {
   memberIds: string[];
 };
 
-export type MaintenanceRequestStatus = 'New' | 'In Progress' | 'Repaired' | 'Scrap';
+export type MaintenanceRequestStatus = 'New' | 'In Progress' | 'Repaired' | 'Scrap' | 'Blocked' | 'Ready for next stage';
 export type MaintenanceRequestPriority = 'High' | 'Medium' | 'Low';
 export type MaintenanceRequestType = 'Corrective' | 'Preventive';
 
