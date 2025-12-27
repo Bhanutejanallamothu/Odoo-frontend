@@ -44,7 +44,7 @@ export default function Header() {
   const pathname = usePathname();
 
   return (
-    <header className="flex h-16 items-center gap-4 border-b bg-card px-4 md:px-6 sticky top-0 z-30">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-white/10 bg-background/50 px-4 backdrop-blur-lg md:px-6">
       <div className="flex items-center gap-4">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
           <FolderGit2 className="h-6 w-6 text-primary" />

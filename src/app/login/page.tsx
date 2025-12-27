@@ -26,7 +26,7 @@ export default function LoginForm() {
   };
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center">
-      <div className="absolute inset-0 z-[-1]">
+      <div className="absolute inset-0 z-[-1] bg-black">
         <Beams
           beamWidth={2}
           beamHeight={15}
@@ -38,7 +38,7 @@ export default function LoginForm() {
           rotation={-25}
         />
       </div>
-      <Card className="mx-auto w-full max-w-sm bg-card/80 backdrop-blur-sm">
+      <Card className="mx-auto w-full max-w-sm">
         <CardHeader className="text-center">
           <CardTitle className="font-headline text-2xl">Login</CardTitle>
           <CardDescription>
