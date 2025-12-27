@@ -5,7 +5,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { MaintenanceRequest, User, Equipment } from '@/lib/types';
+import { MaintenanceRequest, User, Equipment, MaintenanceRequestPriority } from '@/lib/types';
 
 type RequestCardProps = {
   request: MaintenanceRequest;
@@ -21,7 +21,7 @@ export default function RequestCard({ request, user, equipment }: RequestCardPro
     transition,
   };
 
-  const priorityColors: { [key: string]: string } = {
+  const priorityColors: { [key in MaintenanceRequestPriority]: string } = {
     High: 'bg-red-500',
     Medium: 'bg-yellow-500',
     Low: 'bg-green-500',
@@ -32,7 +32,14 @@ export default function RequestCard({ request, user, equipment }: RequestCardPro
   return (
     <Card ref={setNodeRef} style={style} {...attributes} {...listeners} className="touch-none bg-card/50 hover:bg-card/80 transition-colors duration-200 cursor-grab active:cursor-grabbing">
       <CardHeader className="p-4 pb-2">
-        <CardTitle className="text-base leading-tight">{request.subject}</CardTitle>
+        <div className="flex items-start justify-between">
+          <CardTitle className="text-base leading-tight pr-2">{request.subject}</CardTitle>
+          <Badge
+            className={`flex-shrink-0 text-white ${priorityColors[request.priority]}`}
+          >
+            {request.priority}
+          </Badge>
+        </div>
         <CardDescription>{equipment?.name || 'Unknown Equipment'}</CardDescription>
       </CardHeader>
       <CardContent className="p-4 pt-2 flex flex-col gap-3">

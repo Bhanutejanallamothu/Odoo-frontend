@@ -22,7 +22,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 
 import { maintenanceRequests as initialRequests, teams, users, equipment } from '@/lib/mock-data';
-import { MaintenanceRequest, MaintenanceRequestStatus } from '@/lib/types';
+import { MaintenanceRequest, MaintenanceRequestStatus, MaintenanceRequestPriority } from '@/lib/types';
 import RequestCard from './_components/request-card';
 import {
   Dialog,
@@ -70,7 +70,8 @@ export default function RequestsPage() {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [newRequest, setNewRequest] = React.useState<Partial<MaintenanceRequest>>({
     status: 'New',
-    requestType: 'Corrective'
+    requestType: 'Corrective',
+    priority: 'Medium',
   });
 
   const equipmentIdParam = searchParams.get('equipmentId');
@@ -242,7 +243,7 @@ export default function RequestsPage() {
       <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
         <ClientOnlyDndContext sensors={sensors} onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
           {statusColumns.map((status) => (
-            <Card key={status} className="flex flex-col h-full">
+            <Card key={status} className="flex flex-col h-full bg-card/50">
               <CardHeader>
                 <CardTitle>{status}</CardTitle>
                 <CardDescription>
@@ -329,6 +330,24 @@ export default function RequestsPage() {
                 <SelectContent>
                   <SelectItem value="Corrective">Corrective</SelectItem>
                   <SelectItem value="Preventive">Preventive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+             <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="priority" className="text-right">
+                Priority
+              </Label>
+              <Select
+                value={newRequest.priority}
+                onValueChange={(value: MaintenanceRequestPriority) => setNewRequest({ ...newRequest, priority: value })}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="High">High</SelectItem>
+                  <SelectItem value="Medium">Medium</SelectItem>
+                   <SelectItem value="Low">Low</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -38,7 +38,7 @@ export type Team = {
 };
 
 export type MaintenanceRequestStatus = 'New' | 'In Progress' | 'Repaired' | 'Scrap';
-
+export type MaintenanceRequestPriority = 'High' | 'Medium' | 'Low';
 export type MaintenanceRequestType = 'Corrective' | 'Preventive';
 
 export type MaintenanceRequest = {
@@ -49,6 +49,7 @@ export type MaintenanceRequest = {
   dueDate: string; // ISO 8601
   status: MaintenanceRequestStatus;
   requestType: MaintenanceRequestType;
+  priority: MaintenanceRequestPriority;
   scheduledDate?: string; // ISO 8601
   duration?: number; // hours
   notes?: string;

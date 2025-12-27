@@ -137,7 +137,7 @@ export default function EquipmentTable({
           <PlusCircle className="mr-2 h-4 w-4" /> Add Equipment
         </Button>
       </div>
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-card/50">
         <Table>
           <TableHeader>
             <TableRow>
