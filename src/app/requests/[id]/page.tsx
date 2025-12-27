@@ -37,6 +37,7 @@ import { ArrowLeft, Save, FileText } from 'lucide-react';
 import Link from 'next/link';
 import WorkflowIndicator from '@/components/app/workflow-indicator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 export default function MaintenanceRequestDetailPage() {
   const router = useRouter();
@@ -110,6 +111,8 @@ export default function MaintenanceRequestDetailPage() {
   const techniciansForTeam = users.filter(
     (u) => u.role === 'technician' && u.teamId === request.teamId
   );
+  
+  const selectedEquipment = equipment.find(e => e.id === request.equipmentId);
 
   const statuses: MaintenanceRequestStatus[] = ['New', 'In Progress', 'Repaired', 'Scrap'];
 
@@ -159,6 +162,16 @@ export default function MaintenanceRequestDetailPage() {
                 />
               </div>
 
+               <div className="grid gap-2">
+                <Label htmlFor="requester">Created By</Label>
+                <Input
+                  id="requester"
+                  value={users.find(u => u.id === request.requesterId)?.name || 'N/A'}
+                  readOnly
+                  className="bg-muted/50"
+                />
+              </div>
+
               <div className="grid gap-2">
                 <Label htmlFor="equipment">Equipment</Label>
                 <Select
@@ -178,14 +191,42 @@ export default function MaintenanceRequestDetailPage() {
                 </Select>
               </div>
 
-               <div className="grid gap-2">
-                <Label htmlFor="requester">Requester</Label>
+              <div className="grid gap-2">
+                <Label htmlFor="category">Category</Label>
                 <Input
-                  id="requester"
-                  value={users.find(u => u.id === request.requesterId)?.name || 'N/A'}
+                  id="category"
+                  value={selectedEquipment?.category || 'N/A'}
                   readOnly
                   className="bg-muted/50"
                 />
+              </div>
+              
+              <div className="grid gap-2">
+                  <Label htmlFor="due-date">Request Date</Label>
+                  <Input
+                      id="due-date"
+                      type="date"
+                      value={request.dueDate.split('T')[0]}
+                      onChange={(e) => handleInputChange('dueDate', e.target.value)}
+                  />
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Maintenance Type</Label>
+                <RadioGroup 
+                  defaultValue={request.requestType} 
+                  className="flex gap-4"
+                  onValueChange={(v: MaintenanceRequestType) => handleSelectChange('requestType', v)}
+                  >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Corrective" id="corrective" />
+                    <Label htmlFor="corrective">Corrective</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Preventive" id="preventive" />
+                    <Label htmlFor="preventive">Preventive</Label>
+                  </div>
+                </RadioGroup>
               </div>
             </div>
 
