@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -13,6 +14,7 @@ import {
   LogOut,
   LineChart,
   Building,
+  Shapes,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,6 +29,7 @@ const allNavItems: NavItem[] = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiredRoles: ['admin', 'manager', 'technician'] },
     { href: '/requests', label: 'Requests', icon: Wrench, requiredRoles: ['admin', 'manager', 'technician', 'employee'] },
     { href: '/equipment', label: 'Equipment', icon: Wrench, requiredRoles: ['admin', 'manager', 'technician'] },
+    { href: '/equipment-categories', label: 'Equipment Categories', icon: Shapes, requiredRoles: ['admin', 'manager', 'technician'] },
     { href: '/work-centers', label: 'Work Centers', icon: Building, requiredRoles: ['admin', 'manager', 'technician'] },
     { href: '/calendar', label: 'Maintenance Calendar', icon: Calendar, requiredRoles: ['admin', 'manager', 'technician'] },
     { href: '/reporting', label: 'Reporting', icon: LineChart, requiredRoles: ['admin', 'manager'] },

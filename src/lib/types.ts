@@ -1,3 +1,4 @@
+
 import type { LucideIcon } from 'lucide-react';
 
 export type UserRole = 'admin' | 'manager' | 'technician' | 'employee';
@@ -30,6 +31,13 @@ export type Equipment = {
   health: number; // Percentage from 0 to 100
   assignedDate?: string; // ISO 8601
   description?: string;
+};
+
+export type EquipmentCategory = {
+  id: string;
+  name: string;
+  responsible: string;
+  company: string;
 };
 
 export type TeamType = 'Mechanics' | 'Electricians' | 'IT';

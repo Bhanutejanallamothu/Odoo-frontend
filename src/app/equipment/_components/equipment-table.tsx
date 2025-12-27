@@ -1,7 +1,9 @@
+
 "use client";
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   Search,
   PlusCircle,
@@ -105,7 +107,11 @@ export default function EquipmentTable({
                   <TableCell>{item.department}</TableCell>
                   <TableCell className="font-code">{item.serialNumber}</TableCell>
                   <TableCell>{getTechnicianName(item.assignedTechnicianId)}</TableCell>
-                  <TableCell>{item.category}</TableCell>
+                  <TableCell>
+                    <Link href="/equipment-categories" className="hover:underline text-primary" onClick={(e) => e.stopPropagation()}>
+                        {item.category}
+                    </Link>
+                  </TableCell>
                   <TableCell>My Company (San Francisco)</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
