@@ -30,8 +30,10 @@ import {
   users,
 } from '@/lib/mock-data';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = React.useState('');
 
   const openRequests = maintenanceRequests.filter(
@@ -53,6 +55,10 @@ export default function DashboardPage() {
     technicians.length > 0
       ? Math.round((assignedTechnicians.size / technicians.length) * 100)
       : 0;
+      
+  const handleRowClick = (requestId: string) => {
+    router.push(`/requests/${requestId}`);
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -155,7 +161,11 @@ export default function DashboardPage() {
                     };
 
                     return (
-                      <TableRow key={request.id} className="border-t border-dashed">
+                      <TableRow 
+                        key={request.id} 
+                        className="border-t border-dashed cursor-pointer"
+                        onClick={() => handleRowClick(request.id)}
+                      >
                         <TableCell>{request.subject}</TableCell>
                         <TableCell>{employee?.name || 'N/A'}</TableCell>
                         <TableCell>{technician?.name || 'Unassigned'}</TableCell>
