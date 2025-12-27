@@ -13,6 +13,7 @@ import {
   PanelLeft,
   LogOut,
   LineChart,
+  ClipboardList,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,10 +23,10 @@ import {
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { NavItem, UserRole } from '@/lib/types';
-import { Bell } from 'lucide-react';
 
 const allNavItems: NavItem[] = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiredRoles: ['admin', 'manager', 'technician'] },
+    { href: '/my-requests', label: 'My Requests', icon: ClipboardList, requiredRoles: ['employee'] },
     { href: '/equipment', label: 'Equipment', icon: Wrench, requiredRoles: ['admin', 'manager', 'technician'] },
     { href: '/calendar', label: 'Calendar', icon: Calendar, requiredRoles: ['admin', 'manager', 'technician'] },
     { href: '/reporting', label: 'Reporting', icon: LineChart, requiredRoles: ['admin', 'manager'] },

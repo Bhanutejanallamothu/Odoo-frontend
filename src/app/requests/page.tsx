@@ -1,7 +1,7 @@
 "use client";
 import * as React from 'react';
 import { useSearchParams } from 'next/navigation';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverEvent } from '@dnd-kit/core';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { PlusCircle, ListFilter } from 'lucide-react';
 
@@ -112,7 +112,7 @@ export default function RequestsPage() {
     const activeId = String(active.id);
     const overId = String(over.id);
     const activeContainer = active.data.current?.sortable.containerId;
-    const overContainer = over.data.current?.sortable.containerId || over.id;
+    const overContainer = over.data.current?.sortable?.containerId || over.id;
   
     if (activeContainer !== overContainer) {
       setRequests((prev) => {
@@ -121,12 +121,16 @@ export default function RequestsPage() {
   
         const newStatus = overContainer as MaintenanceRequestStatus;
         const newRequests = [...prev];
-        newRequests[activeIndex] = {
+        const updatedRequest = {
           ...newRequests[activeIndex],
           status: newStatus,
         };
-  
-        return arrayMove(newRequests, activeIndex, activeIndex);
+        newRequests[activeIndex] = updatedRequest;
+        
+        // This is a simplified version; for a real app, you might want to re-sort
+        // or handle placement within the new column more explicitly.
+        // For now, we'll just update the status.
+        return newRequests; 
       });
     } else {
         setRequests((prev) => {
