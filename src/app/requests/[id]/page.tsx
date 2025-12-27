@@ -33,7 +33,9 @@ import {
   MaintenanceRequestStatus,
   MaintenanceRequestType,
 } from '@/lib/types';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, FileText } from 'lucide-react';
+import Link from 'next/link';
+import WorkflowIndicator from '@/components/app/workflow-indicator';
 
 export default function MaintenanceRequestDetailPage() {
   const router = useRouter();
@@ -108,21 +110,34 @@ export default function MaintenanceRequestDetailPage() {
     (u) => u.role === 'technician' && u.teamId === request.teamId
   );
 
+  const statuses: MaintenanceRequestStatus[] = ['New', 'In Progress', 'Repaired', 'Scrap'];
+
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <h1 className="text-3xl font-bold tracking-tight font-headline">
-          {request.subject}
-        </h1>
-        <div className="flex-grow" />
-        <Button onClick={handleSave}>
-          <Save className="mr-2 h-4 w-4" />
-          Save Changes
-        </Button>
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-4">
+            <Button variant="outline" size="icon" onClick={() => router.back()}>
+                <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight font-headline text-muted-foreground">
+                <Link href="/requests" className="hover:text-primary">Maintenance Requests</Link>
+                <span className="text-primary mx-2">&gt;</span>
+                <span className="text-primary">{request.subject}</span>
+            </h1>
+        </div>
+        <div className="flex items-center gap-2 ml-auto">
+            <Button variant="outline"><FileText className="mr-2 h-4 w-4" /> Worksheet</Button>
+            <Button onClick={handleSave}>
+                <Save className="mr-2 h-4 w-4" />
+                Save Changes
+            </Button>
+        </div>
       </div>
+      
+      <div className="w-full max-w-2xl mx-auto my-4">
+        <WorkflowIndicator currentStatus={request.status} statuses={statuses} />
+      </div>
+
 
       <Card>
         <CardHeader>
@@ -252,7 +267,7 @@ export default function MaintenanceRequestDetailPage() {
                 value={request.teamId}
                 onValueChange={(v) => {
                   handleSelectChange('teamId', v);
-                  handleSelectChange('assignedTechnicianId', ''); // Reset tech on team change
+                  handleSelectChange('assignedTechnicianId', 'unassigned'); // Reset tech on team change
                 }}
               >
                 <SelectTrigger id="team">
