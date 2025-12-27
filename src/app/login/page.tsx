@@ -26,8 +26,16 @@ import { User } from '@/lib/types';
 
 export default function LoginForm() {
   const router = useRouter();
+
+  const roleDisplayUsers: User[] = [
+    users.find((u) => u.role === 'employee')!,
+    users.find((u) => u.role === 'technician')!,
+    users.find((u) => u.role === 'manager')!,
+    users.find((u) => u.role === 'admin')!,
+  ].filter(Boolean); // Filter out any undefined users if a role is not found
+
   const [selectedUser, setSelectedUser] = React.useState<User | undefined>(
-    users.find((u) => u.role === 'technician')
+    roleDisplayUsers[1] // Default to technician
   );
 
   const handleUserChange = (userId: string) => {
@@ -40,6 +48,17 @@ export default function LoginForm() {
     // For this mock, we'll just redirect to the dashboard.
     router.push('/dashboard');
   };
+  
+  const getRoleDisplayName = (role: string) => {
+      switch (role) {
+          case 'admin': return 'Administrator';
+          case 'manager': return 'Maintenance Manager';
+          case 'technician': return 'Technician';
+          case 'employee': return 'User';
+          default: return 'User';
+      }
+  }
+
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center">
       <Card className="mx-auto w-full max-w-sm">
@@ -58,9 +77,9 @@ export default function LoginForm() {
                   <SelectValue placeholder="Select a user" />
                 </SelectTrigger>
                 <SelectContent>
-                  {users.map((user) => (
+                  {roleDisplayUsers.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
-                      {user.name} ({user.role})
+                      {getRoleDisplayName(user.role)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -75,6 +94,7 @@ export default function LoginForm() {
                 required
                 value={selectedUser?.email || ''}
                 readOnly
+                className="bg-muted/50"
               />
             </div>
             <div className="grid gap-2 text-left">
