@@ -4,7 +4,6 @@
 import * as React from 'react';
 import {
   MoreHorizontal,
-  PlusCircle,
   Search,
   Trash2,
   Pencil,
@@ -32,32 +31,31 @@ import { WorkCenter } from '@/lib/types';
 
 type WorkCenterTableProps = {
   workCenters: WorkCenter[];
+  onEdit: (workCenter: WorkCenter) => void;
+  onDelete: (workCenter: WorkCenter) => void;
+  onSelectRow: (id: string) => void;
+  onSelectAll: (checked: boolean) => void;
+  selectedRows: string[];
 };
 
 export default function WorkCenterTable({
-  workCenters: allWorkCenters,
+  workCenters,
+  onEdit,
+  onDelete,
+  onSelectRow,
+  onSelectAll,
+  selectedRows,
 }: WorkCenterTableProps) {
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [selectedRows, setSelectedRows] = React.useState<string[]>([]);
 
   const filteredWorkCenters = React.useMemo(() => {
-    return allWorkCenters.filter(
+    return workCenters.filter(
       (item) =>
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.department.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [allWorkCenters, searchTerm]);
-
-  const handleSelectRow = (id: string) => {
-    setSelectedRows((prev) =>
-      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
-    );
-  };
-
-  const handleSelectAll = (checked: boolean) => {
-    setSelectedRows(checked ? filteredWorkCenters.map((wc) => wc.id) : []);
-  };
+  }, [workCenters, searchTerm]);
 
   const isAllSelected =
     filteredWorkCenters.length > 0 &&
@@ -75,9 +73,7 @@ export default function WorkCenterTable({
             className="pl-10 max-w-sm"
           />
         </div>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" /> New Work Center
-        </Button>
+        {/* "New Work Center" button is now in the parent page */}
       </div>
       <div className="rounded-md border bg-card/50">
         <Table>
@@ -86,7 +82,7 @@ export default function WorkCenterTable({
               <TableHead padding="checkbox">
                 <Checkbox
                   checked={isAllSelected}
-                  onCheckedChange={(checked) => handleSelectAll(!!checked)}
+                  onCheckedChange={(checked) => onSelectAll(!!checked)}
                   aria-label="Select all"
                 />
               </TableHead>
@@ -106,7 +102,7 @@ export default function WorkCenterTable({
                   <TableCell padding="checkbox">
                     <Checkbox
                       checked={selectedRows.includes(item.id)}
-                      onCheckedChange={() => handleSelectRow(item.id)}
+                      onCheckedChange={() => onSelectRow(item.id)}
                       aria-label={`Select row ${item.id}`}
                     />
                   </TableCell>
@@ -115,10 +111,10 @@ export default function WorkCenterTable({
                   <TableCell>{item.description}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="icon">
+                      <Button variant="outline" size="icon" onClick={() => onEdit(item)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="icon">
+                      <Button variant="outline" size="icon" onClick={() => onDelete(item)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
